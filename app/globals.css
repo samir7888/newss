@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --muted: #475569;
+  --accent: #0f766e;
+  --accent-strong: #134e4a;
+  --border: rgba(15, 23, 42, 0.08);
 }
 
 @theme inline {
@@ -11,16 +16,71 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-devanagari), var(--font-geist-sans), "Segoe UI", Arial, sans-serif;
+}
+
+
+* {
+  box-sizing: border-box;
+}
+button,
+input,
+nav,
+.font-display {
+  font-family: var(--font-devanagari), var(--font-geist-sans), "Segoe UI", Arial, sans-serif;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container-shell {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.article-body p {
+  margin-bottom: 1.4rem;
+  color: #334155;
+  max-width: 78ch;
+  font-size: 1.18rem;
+  line-height: 2.1;
+}
+
+.article-body .article-lead {
+  color: #0f172a;
+  font-size: 1.38rem;
+  font-weight: 600;
+  line-height: 1.9;
+}
+
+.article-body h2 {
+  margin: 2.2rem 0 1rem;
+  max-width: 78ch;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.article-body a {
+  color: #0f766e;
+  text-decoration: underline;
+}
+
+.ad-slot {
+  border: 1px dashed rgba(15, 118, 110, 0.4);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+}
+
+.text-balance {
+  text-wrap: balance;
 }

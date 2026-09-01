@@ -6,21 +6,39 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "news:fetch": "tsx scripts/fetch-news.ts",
+    "news:translate": "tsx scripts/translate-existing-news.ts",
+    "news:repair-categories": "tsx scripts/repair-article-categories.ts",
+    "seed:db": "tsx scripts/seed-db.ts"
   },
   "dependencies": {
+    "@types/pg": "^8.23.1",
+    "cheerio": "^1.2.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "lucide-react": "^1.38.0",
     "next": "16.3.4",
+    "next-intl": "^4.14.1",
+    "pg": "^8.23.0",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "rss-parser": "^3.13.0",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.2.18",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.13",
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   }
 }
