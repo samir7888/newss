@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getLatestArticles } from "@/lib/news-data";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const origin = siteUrl.replace(/\/$/, "");
