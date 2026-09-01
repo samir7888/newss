@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { normalizeNepaliText, stripHtml, toRichHtml } from "./article-content";
-import { hasDevanagari } from "../scripts/fetch-news";
+import {
+  hasDevanagari,
+  isInvalidTranslationText,
+  makeSlug,
+} from "../scripts/fetch-news";
 
 describe("article-content", () => {
   it("strips html properly", () => {
@@ -29,4 +33,30 @@ describe("article-content", () => {
     expect(hasDevanagari("नेपाल समाचार")).toBe(true);
     expect(hasDevanagari("Nepal News update")).toBe(false);
   });
+
+  it("identifies invalid translation API error responses correctly", () => {
+    expect(
+      isInvalidTranslationText(
+        "'AUTO' IS AN INVALID SOURCE LANGUAGE . EXAMPLE: LANGPAIR=EN|IT USING 2 LETTER ISO OR RFC3066 LIKE ZH-CN. ALMOST ALL LANGUAGES SUPPORTED BUT SOME MAY HAVE NO CONTENT",
+      ),
+    ).toBe(true);
+    expect(
+      isInvalidTranslationText("auto-is-an-invalid-source-language-example"),
+    ).toBe(true);
+    expect(isInvalidTranslationText("MYMEMORY WARNING: YOU USED ALL AVAILABLE FREE TRANSLATIONS")).toBe(true);
+    expect(isInvalidTranslationText("Nepal government announces new fiscal policies")).toBe(false);
+    expect(isInvalidTranslationText("नेपालको ताजा समाचार")).toBe(false);
+  });
+
+  it("sanitizes makeSlug against invalid translation errors", () => {
+    expect(
+      makeSlug(
+        "'AUTO' IS AN INVALID SOURCE LANGUAGE . EXAMPLE: LANGPAIR=EN|IT USING 2 LETTER ISO",
+      ),
+    ).toBe("nepal-news");
+    expect(makeSlug("Flood relief efforts in Rasuwa")).toBe(
+      "flood-relief-efforts-in-rasuwa",
+    );
+  });
 });
+

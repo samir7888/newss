@@ -647,6 +647,27 @@ function extractPageData(
   };
 }
 
+export function isInvalidTranslationText(text: string | null | undefined): boolean {
+  if (!text || typeof text !== "string") return true;
+  const lower = text.toLowerCase();
+  return (
+    lower.includes("invalid source language") ||
+    lower.includes("invalid target language") ||
+    lower.includes("langpair=") ||
+    lower.includes("mymemory warning") ||
+    lower.includes("quota finished") ||
+    lower.includes("query length limit") ||
+    lower.includes("using 2 letter iso") ||
+    lower.includes("rfc3066") ||
+    lower.includes("almost all languages supported") ||
+    lower.includes("is an invalid source language") ||
+    lower.includes("auto is an invalid") ||
+    lower.includes("auto-is-an-invalid") ||
+    lower.includes("daily limit reached") ||
+    lower.includes("mymemory")
+  );
+}
+
 export async function translateSingle(
   value: string,
   target: "en" | "ne",
@@ -655,53 +676,106 @@ export async function translateSingle(
   if (!trimmed) return "";
 
   if (target === "ne" && hasDevanagari(trimmed)) return trimmed;
-  if (target === "en" && !hasDevanagari(trimmed)) return trimmed;
+  if (target === "en" && !hasDevanagari(trimmed) && !isInvalidTranslationText(trimmed)) return trimmed;
 
-  const url = new URL("https://translate.googleapis.com/translate_a/single");
-  url.searchParams.set("client", "gtx");
-  url.searchParams.set("sl", "auto");
-  url.searchParams.set("tl", target);
-  url.searchParams.set("dt", "t");
-  url.searchParams.set("q", trimmed);
+  const source = target === "en" ? "ne" : "en";
 
   for (let attempt = 0; attempt < 3; attempt++) {
+    // 1. Google Translate GTX
     try {
+      const url = new URL("https://translate.googleapis.com/translate_a/single");
+      url.searchParams.set("client", "gtx");
+      url.searchParams.set("sl", source);
+      url.searchParams.set("tl", target);
+      url.searchParams.set("dt", "t");
+      url.searchParams.set("q", trimmed);
+
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 9000);
-      const response = await fetch(url, { signal: controller.signal });
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const response = await fetch(url.toString(), {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+        signal: controller.signal,
+      });
       clearTimeout(timeoutId);
 
       if (response.ok) {
         const result = (await response.json()) as Array<Array<[string]>>;
         const translated =
-          result[0]?.map((part) => part[0]).join("") || trimmed;
-        if (target === "ne" && !hasDevanagari(translated)) {
-          // Retry or try fallback
-        } else if (target === "en" && hasDevanagari(translated)) {
-          // Retry or try fallback
-        } else {
+          result[0]?.map((part) => part[0]).join("") || "";
+        if (
+          translated &&
+          !isInvalidTranslationText(translated) &&
+          ((target === "ne" && hasDevanagari(translated)) ||
+            (target === "en" && !hasDevanagari(translated)))
+        ) {
           return translated;
         }
       }
     } catch {
-      // Ignore and fallback
+      // Ignore and try next provider
     }
 
+    // 2. Google Translate dict-chrome-ex fallback
+    try {
+      const dictUrl = new URL("https://clients5.google.com/translate_a/t");
+      dictUrl.searchParams.set("client", "dict-chrome-ex");
+      dictUrl.searchParams.set("sl", source);
+      dictUrl.searchParams.set("tl", target);
+      dictUrl.searchParams.set("q", trimmed);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const dictResponse = await fetch(dictUrl.toString(), {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (dictResponse.ok) {
+        const dictResult = (await dictResponse.json()) as string[];
+        const translated = Array.isArray(dictResult) ? dictResult[0] : "";
+        if (
+          translated &&
+          !isInvalidTranslationText(translated) &&
+          ((target === "ne" && hasDevanagari(translated)) ||
+            (target === "en" && !hasDevanagari(translated)))
+        ) {
+          return translated;
+        }
+      }
+    } catch {
+      // Ignore and try next provider
+    }
+
+    // 3. MyMemory Fallback with correct 2-letter language pair (ne|en or en|ne)
     try {
       const fallbackUrl = new URL("https://api.mymemory.translated.net/get");
       fallbackUrl.searchParams.set("q", trimmed);
-      fallbackUrl.searchParams.set("langpair", `auto|${target}`);
+      fallbackUrl.searchParams.set("langpair", `${source}|${target}`);
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
-      const fbResponse = await fetch(fallbackUrl, { signal: controller.signal });
+      const fbResponse = await fetch(fallbackUrl.toString(), {
+        signal: controller.signal,
+      });
       clearTimeout(timeoutId);
 
       if (fbResponse.ok) {
         const fbResult = (await fbResponse.json()) as {
           responseData?: { translatedText?: string };
+          responseStatus?: number;
         };
         const text = fbResult.responseData?.translatedText;
-        if (text) {
+        if (
+          text &&
+          fbResult.responseStatus === 200 &&
+          !isInvalidTranslationText(text)
+        ) {
           if (target === "ne" && hasDevanagari(text)) return text;
           if (target === "en" && !hasDevanagari(text)) return text;
         }
@@ -711,7 +785,7 @@ export async function translateSingle(
     }
 
     if (attempt < 2) {
-      await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)));
+      await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
     }
   }
 
@@ -725,10 +799,16 @@ export async function translateParagraphList(
   const results: string[] = [];
   for (const paragraph of paragraphs) {
     const cleanP = cleanText(paragraph);
-    if (!cleanP) continue;
+    if (!cleanP || isInvalidTranslationText(cleanP)) continue;
     try {
       const translated = await translateSingle(cleanP, target);
-      results.push(translated);
+      if (!isInvalidTranslationText(translated)) {
+        results.push(translated);
+      } else {
+        results.push(cleanP);
+      }
+      // Small pause between paragraphs to avoid rate-limiting
+      await new Promise((r) => setTimeout(r, 150));
     } catch (err) {
       console.warn(`Translation error for paragraph: ${(err as Error).message}`);
       results.push(cleanP);
@@ -774,7 +854,10 @@ async function fetchFeedEntries() {
   return entries;
 }
 
-function makeSlug(title: string) {
+export function makeSlug(title: string) {
+  if (isInvalidTranslationText(title)) {
+    return "nepal-news";
+  }
   const clean = title
     .toLowerCase()
     .replace(/[^a-z0-9\u0980-\u09ff]+/g, "-")
@@ -981,18 +1064,20 @@ export async function runNewsFetch() {
             "en",
           );
 
-          // If English translation retained Devanagari due to fallback, clean it
-          if (hasDevanagari(titleEn)) {
+          // If English translation retained Devanagari due to fallback or is an error, clean it
+          if (hasDevanagari(titleEn) || isInvalidTranslationText(titleEn)) {
             titleEn = "Nepal News: " + entry.source;
           }
-          if (hasDevanagari(excerptEn)) {
+          if (hasDevanagari(excerptEn) || isInvalidTranslationText(excerptEn)) {
             excerptEn = "Latest reporting and updates from Nepal.";
           }
-          englishParagraphs = englishParagraphs.map((p, idx) =>
-            hasDevanagari(p)
-              ? `Reported developments regarding this story continue to unfold from ${entry.source}.`
-              : p,
-          );
+          englishParagraphs = englishParagraphs
+            .filter((p) => !isInvalidTranslationText(p))
+            .map((p) =>
+              hasDevanagari(p)
+                ? `Reported developments regarding this story continue to unfold from ${entry.source}.`
+                : p,
+            );
         } else {
           // Source is English: preserve original English and translate to Nepali
           titleEn = rawTitle;
@@ -1006,6 +1091,14 @@ export async function runNewsFetch() {
             englishParagraphs,
             "ne",
           );
+
+          if (!hasDevanagari(titleNe) || isInvalidTranslationText(titleNe)) {
+            titleNe = rawTitle;
+          }
+          if (!hasDevanagari(excerptNe) || isInvalidTranslationText(excerptNe)) {
+            excerptNe = rawExcerpt;
+          }
+          nepaliParagraphs = nepaliParagraphs.filter((p) => !isInvalidTranslationText(p));
         }
 
         const sourceCategory = inferCategorySlugFromText(
@@ -1014,7 +1107,10 @@ export async function runNewsFetch() {
           entry.category,
         );
 
-        const slugSeed = titleEn || rawTitle;
+        const slugSeed =
+          (!isInvalidTranslationText(titleEn) && titleEn) ||
+          (!isInvalidTranslationText(rawTitle) && rawTitle) ||
+          "nepal-news";
         const slug = makeSlug(slugSeed);
         const timestamp = Date.now();
 
