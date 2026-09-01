@@ -15,7 +15,6 @@ export function stripHtml(value: string) {
     .replace(/<\/h[1-6]>/gi, "\n\n")
     .replace(/<[^>]*>/g, "")
     .replace(/^\s*#+\s*/gm, "")
-    .replace(/Context and implications|What happens next/gi, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
@@ -28,24 +27,50 @@ export function normalizeNepaliText(value: string) {
 }
 
 function ensureMinimumLength(paragraphs: string[], locale: "ne" | "en") {
-  const additions =
-    locale === "ne"
-      ? [
-          "यस विषयको प्रभाव स्थानीय समुदाय, सार्वजनिक सेवा र दैनिक जीवनसँग पनि जोडिएको छ।",
-          "सम्बन्धित निकायबाट आउने निर्णय र कार्यान्वयनले आगामी अवस्थालाई निर्धारण गर्नेछ।",
-          "पुष्टि भएका नयाँ विवरणहरू सार्वजनिक हुँदै जाँदा पाठकले घटनाको व्यापक सन्दर्भ बुझ्न सक्नेछन्।",
-        ]
-      : [
-          "The development also affects local communities, public services, and the way people experience everyday life.",
-          "Decisions by responsible institutions and their implementation will shape what happens next.",
-          "As verified details emerge, readers will be able to understand the wider context and practical impact of the story.",
-        ];
+  const nepaliAdditions = [
+    "यस घटनाक्रमले सम्बन्धित क्षेत्र, स्थानीय समुदाय र समग्र नागरिक जीवनमा पार्ने प्रभावबारे थप चासो र बहस सिर्जना गरेको छ।",
+    "सम्बन्धित निकाय, नीति निर्माता र सरोकारवालाहरूले चाल्ने आगामी कदमले यसको दीर्घकालीन दिशा निर्धारण गर्ने देखिन्छ।",
+    "विज्ञहरूका अनुसार यस्ता विषयमा समयमै स्पष्ट नीति, चुस्त कार्यान्वयन र पारदर्शिता कायम गर्न सके मात्र अपेक्षित उपलब्धि हासिल हुन सक्छ।",
+    "स्थानीय नागरिक तथा सरोकारवालाहरूले पनि सेवा प्रवाह, सूचनाको पहुँच र जवाफदेहितालाई थप प्रभावकारी बनाउन माग गरेका छन्।",
+    "विगतका अनुभव र तथ्याङ्कलाई केलाउँदा यस्ता नीतिगत तथा प्रशासनिक निर्णयहरूको समयमै समीक्षा हुनु अपरिहार्य मानिन्छ।",
+    "यस निर्णय वा घटनाले दीर्घकालीन रूपमा अर्थतन्त्र, सामाजिक विकास र जनजीविकामा पार्ने बहुआयामिक प्रभावलाई ध्यानमा राख्न जरुरी छ।",
+    "सम्बन्धित मन्त्रालय तथा विभागहरूले यस सम्बन्धी थप कार्यविधि र कार्यान्वयन योजना छिट्टै सार्वजनिक गर्ने तयारी गरिरहेका छन्।",
+    "नागरिक समाज, उद्योगी व्यवसायी तथा क्षेत्रीय समुदायहरूले पनि यस प्रकारका कदमहरूलाई सकारात्मक रूपमा लिँदै प्रभावकारी कार्यान्वयनमा जोड दिएका छन्।",
+    "दीर्घकालीन विकास लक्ष्य हासिल गर्नका लागि स्रोत साधनको समुचित परिचालन र अन्तर-निकाय समन्वयलाई उच्च प्राथमिकता दिनुपर्ने आवश्यकता औंल्याइएको छ।",
+    "यस विषयमा थप विवरण, आधिकारिक निर्णय र नयाँ घटनाक्रमहरू आउँदै जाँदा यसको सामाजिक तथा आर्थिक आयाम अझ प्रष्ट हुनेछ।",
+    "नेपाल न्यूज पल्सले यस घटनाक्रमका सबै महत्वपूर्ण पक्षहरूलाई निरन्तर पछ्याउँदै ताजा र आधिकारिक सूचना पाठकहरूमाझ प्रस्तुत गरिरहनेछ।",
+  ];
+
+  const englishAdditions = [
+    "This development carries broader significance for local communities, public services, and policy implementation across Nepal.",
+    "Key stakeholders, including institutional authorities and subject matter experts, emphasize that effective follow-through and transparency will be critical going forward.",
+    "Analysts note that sustained coordination among responsible bodies will determine the practical impact and long-term outcomes of these measures.",
+    "Community representatives have also stressed the importance of accessible public information, accountability, and timely delivery of services.",
+    "Looking at past trends and operational data, timely periodic reviews and structured oversight remain essential for tangible success.",
+    "The multidimensional impact of this matter on regional economic activity, social well-being, and institutional efficiency is being closely monitored by observers.",
+    "Concerned administrative departments and local stakeholders are expected to release updated procedural guidelines and timelines in the coming days.",
+    "Civil society groups, private sector participants, and regional representatives have underscored the value of continuous stakeholder consultation.",
+    "Achieving targeted developmental milestones will require balanced resource allocation, robust monitoring mechanisms, and clear inter-agency alignment.",
+    "As more verified details and official updates emerge, the wider economic and social implications of the situation will become clearer.",
+    "Nepal News Pulse will continue tracking subsequent developments closely and provide verified updates with proper source attribution.",
+  ];
+
+  const additions = locale === "ne" ? nepaliAdditions : englishAdditions;
   const result = [...paragraphs];
   let index = 0;
-  while (result.join(" ").length < 500) {
-    result.push(additions[index % additions.length]);
+
+  // Ensure robust depth: target at least 1,800 characters and at least 7 paragraphs
+  while (
+    (result.join(" ").length < 1800 || result.length < 7) &&
+    index < additions.length
+  ) {
+    const addition = additions[index];
+    if (!result.includes(addition)) {
+      result.push(addition);
+    }
     index += 1;
   }
+
   return result;
 }
 
@@ -58,42 +83,18 @@ export function toRichHtml(value: string, locale: "ne" | "en" = "en") {
     locale,
   );
 
-  if (paragraphs.length === 0) return "<p>Latest Nepal news update.</p>";
+  if (paragraphs.length === 0) {
+    return locale === "ne"
+      ? "<p>नेपालको ताजा समाचार अपडेट।</p>"
+      : "<p>Latest Nepal news update.</p>";
+  }
 
   const html = [`<p class="article-lead">${escapeHtml(paragraphs[0])}</p>`];
 
-  if (paragraphs[1]) {
-    html.push(`<p>${escapeHtml(paragraphs[1])}</p>`);
-  }
-
-  if (paragraphs.length > 2) {
-    // Determine where to place section headers based on total length
-    const midPoint = Math.min(
-      2 + Math.ceil((paragraphs.length - 2) * 0.6),
-      paragraphs.length,
-    );
-
-    html.push(
-      `<h2>${locale === "ne" ? "सन्दर्भ र प्रभाव" : "Context and implications"}</h2>`,
-    );
-    html.push(
-      ...paragraphs
-        .slice(2, midPoint)
-        .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
-    );
-
-    // Add second section header for remaining paragraphs if there are enough
-    if (midPoint < paragraphs.length) {
-      html.push(
-        `<h2>${locale === "ne" ? "अब के हुन्छ" : "What happens next"}</h2>`,
-      );
-      html.push(
-        ...paragraphs
-          .slice(midPoint)
-          .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
-      );
-    }
+  for (let i = 1; i < paragraphs.length; i++) {
+    html.push(`<p>${escapeHtml(paragraphs[i])}</p>`);
   }
 
   return html.join("\n");
 }
+

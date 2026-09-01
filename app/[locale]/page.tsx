@@ -152,9 +152,6 @@ export default async function LocaleHomePage({
                     <span>{resolvedLocale === "ne" ? "विस्तृत पढ्नुहोस्" : "Read full story"}</span>
                     <span aria-hidden="true">→</span>
                   </Link>
-                  <span className="text-xs text-slate-400">
-                    {leadStory.source}
-                  </span>
                 </div>
               </div>
             </article>

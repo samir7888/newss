@@ -67,8 +67,6 @@ function toArticleRecord(row: {
     bodyHtml: {
       ne: row.bodyNe.includes("<p")
         ? normalizeNepaliText(row.bodyNe)
-            .replace(/Context and implications/gi, "सन्दर्भ र प्रभाव")
-            .replace(/What happens next/gi, "अब के हुन्छ")
         : toRichHtml(normalizeNepaliText(row.bodyNe), "ne"),
       en: row.bodyEn.includes("<p") ? row.bodyEn : toRichHtml(row.bodyEn),
     },

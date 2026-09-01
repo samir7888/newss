@@ -128,17 +128,7 @@ export default async function ArticlePage({
               </span>
             </div>
 
-            {/* Quick 1-tap locale switcher keeping same article */}
-            <Link
-              href={alternateHref}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-800 text-xs font-semibold transition"
-              aria-label="Switch article language"
-            >
-              <Globe className="h-3 w-3" />
-              <span>
-                {resolvedLocale === "ne" ? "Read in English" : "नेपालीमा पढ्नुहोस्"}
-              </span>
-            </Link>
+           
           </div>
 
           {/* §2: LARGE HEADLINE (Owns the top of page) */}
@@ -151,26 +141,7 @@ export default async function ArticlePage({
             {article.excerpt[resolvedLocale]}
           </p>
 
-          {/* §2: BYLINE & SOURCE ATTRIBUTION LINE */}
-          <div className="mt-5 pt-3 pb-3 border-y border-slate-200/80 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-slate-500">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-800">
-                {resolvedLocale === "ne" ? "स्रोत / रिपोर्टिङ:" : "Reporting by:"}
-              </span>
-              <a
-                href={article.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 font-semibold text-red-700 hover:underline"
-              >
-                <span>{article.source}</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-            <time dateTime={new Date(article.publishedAt).toISOString()} className="text-slate-400">
-              {fullDate}
-            </time>
-          </div>
+        
 
           {/* ============================================================= */}
           {/* §6: HERO IMAGE WITH VISIBLE CAPTION + PHOTO CREDIT */}
@@ -186,12 +157,7 @@ export default async function ArticlePage({
                 className="object-cover"
               />
             </div>
-            <figcaption className="mt-2.5 px-1 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-              <span>{article.imageAlt[resolvedLocale] || article.title[resolvedLocale]}</span>
-              <span className="text-slate-400 font-medium">
-                {resolvedLocale === "ne" ? "तस्बिर / स्रोत:" : "Photo / Source:"} {article.source}
-              </span>
-            </figcaption>
+            
           </figure>
 
           {/* ============================================================= */}
