@@ -67,25 +67,32 @@ export function toRichHtml(value: string, locale: "ne" | "en" = "en") {
   }
 
   if (paragraphs.length > 2) {
+    // Determine where to place section headers based on total length
+    const midPoint = Math.min(
+      2 + Math.ceil((paragraphs.length - 2) * 0.6),
+      paragraphs.length,
+    );
+
     html.push(
       `<h2>${locale === "ne" ? "सन्दर्भ र प्रभाव" : "Context and implications"}</h2>`,
     );
     html.push(
       ...paragraphs
-        .slice(2, Math.max(3, paragraphs.length - 2))
+        .slice(2, midPoint)
         .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
     );
-  }
 
-  if (paragraphs.length > 4) {
-    html.push(
-      `<h2>${locale === "ne" ? "अब के हुन्छ" : "What happens next"}</h2>`,
-    );
-    html.push(
-      ...paragraphs
-        .slice(-2)
-        .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
-    );
+    // Add second section header for remaining paragraphs if there are enough
+    if (midPoint < paragraphs.length) {
+      html.push(
+        `<h2>${locale === "ne" ? "अब के हुन्छ" : "What happens next"}</h2>`,
+      );
+      html.push(
+        ...paragraphs
+          .slice(midPoint)
+          .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+      );
+    }
   }
 
   return html.join("\n");

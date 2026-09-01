@@ -1,131 +1,349 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Clock, TrendingUp, Flame, ShieldCheck, Newspaper } from "lucide-react";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { ArticleCard } from "@/components/article/ArticleCard";
+import { NewsletterBox } from "@/components/article/NewsletterBox";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { getCategories, getLatestArticles } from "@/lib/news-data";
-import Image from "next/image";
-
-const localeNames = {
-    ne: "नेपाली",
-    en: "English",
-} as const;
+import { formatRelativeTime } from "@/lib/format-date";
+import { getCategoryTheme } from "@/lib/category-theme";
+import type { Locale } from "@/lib/site";
 
 export function generateStaticParams() {
-    return [{ locale: "ne" }, { locale: "en" }];
+  return [{ locale: "ne" }, { locale: "en" }];
 }
 
 export default async function LocaleHomePage({
-    params,
+  params,
 }: {
-    params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string }>;
 }) {
-    const { locale } = await params;
-    const resolvedLocale = locale === "en" ? "en" : "ne";
+  const { locale } = await params;
+  const resolvedLocale: Locale = locale === "en" ? "en" : "ne";
 
-    if (!["ne", "en"].includes(resolvedLocale)) {
-        notFound();
-    }
+  if (!["ne", "en"].includes(resolvedLocale)) {
+    notFound();
+  }
 
-    const [articles, categories] = await Promise.all([
-        getLatestArticles(9),
-        getCategories(),
-    ]);
+  const [articles, categoriesList] = await Promise.all([
+    getLatestArticles(24),
+    getCategories(),
+  ]);
 
-    if (!articles.length) {
-        return (
-            <>
-                <Header locale={resolvedLocale} />
-                <main className="container-shell py-8 md:py-10">
-                    <section className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                        <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{localeNames[resolvedLocale]}</p>
-                            <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-                                {resolvedLocale === "ne" ? "ट्रेन्डिङ समाचार" : "Trending News"}
-                            </h1>
-                        </div>
-                    </section>
-                    <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">
-                        {resolvedLocale === "ne" ? "अहिले डेटाबेसमा कुनै वास्तविक समाचार छैन।" : "There are no live stories in the database yet."}
-                    </div>
-                </main>
-                <Footer locale={resolvedLocale} />
-            </>
-        );
-    }
-
-    const heroArticle = articles[0];
-    const remaining = articles.slice(1);
-    const heroSlug = resolvedLocale === "ne" && "slugNe" in heroArticle ? heroArticle.slugNe : heroArticle.slug;
-
+  if (!articles.length) {
     return (
-        <>
-            <Header locale={resolvedLocale} />
-            <main className="container-shell py-8 md:py-10">
-                <section className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{localeNames[resolvedLocale]}</p>
-                        <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-                            {resolvedLocale === "ne" ? "ट्रेन्डिङ समाचार" : "Trending News"}
-                        </h1>
-                    </div>
-                    <div className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
-                        {resolvedLocale === "ne" ? "आजको अपडेट" : "Latest updates"}
-                    </div>
-                </section>
-
-                <section className="grid gap-6 lg:grid-cols-[1.5fr_0.9fr]">
-                    <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                        <div className="relative min-h-80 w-full overflow-hidden">
-                            <Image src={heroArticle.image} alt={heroArticle.imageAlt[resolvedLocale]} fill className="object-top object-cover" />
-                        </div>
-                        <div className="p-6 md:p-8">
-                            <div className="mb-3 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                {categories.find((category) => category.slug === heroArticle.category)?.name[resolvedLocale] || heroArticle.category}
-                            </div>
-                            <h2 className="text-2xl font-bold leading-tight text-slate-900 md:text-4xl">
-                                {heroArticle.title[resolvedLocale]}
-                            </h2>
-                            <p className="mt-4 text-base leading-7 text-slate-600">{heroArticle.excerpt[resolvedLocale]}</p>
-                            <div className="mt-6 flex items-center justify-between gap-4">
-
-                                <Link href={`/${resolvedLocale}/article/${heroSlug}`} className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700">
-                                    {resolvedLocale === "ne" ? "पूरा समाचार" : "Read story"}
-                                </Link>
-                            </div>
-                        </div>
-                    </article>
-
-                    <aside className="space-y-4">
-                        {remaining.slice(0, 3).map((article) => (
-                            <Link key={article.slug} href={`/${resolvedLocale}/article/${resolvedLocale === "ne" && "slugNe" in article ? article.slugNe : article.slug}`} className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md">
-                                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                                    {categories.find((category) => category.slug === article.category)?.name[resolvedLocale] || article.category}
-                                </div>
-                                <h3 className="text-lg font-semibold leading-snug text-slate-900">{article.title[resolvedLocale]}</h3>
-                                <p className="mt-2 text-sm text-slate-600">{article.excerpt[resolvedLocale]}</p>
-                            </Link>
-                        ))}
-                    </aside>
-                </section>
-
-                <AdSlot label={resolvedLocale === "ne" ? "विज्ञापन" : "Advertisement"} />
-
-                <section className="mt-10">
-                    <div className="mb-5 flex items-center justify-between">
-                        <h2 className="text-2xl font-bold text-slate-900">
-                            {resolvedLocale === "ne" ? "भर्खरका समाचार" : "Latest stories"}
-                        </h2>
-                    </div>
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {articles.map((article) => (
-                            <ArticleCard key={article.slug} article={article} locale={resolvedLocale} />
-                        ))}
-                    </div>
-                </section>
-            </main>
-            <Footer locale={resolvedLocale} />
-        </>
+      <>
+        <Header locale={resolvedLocale} />
+        <main className="container-shell py-12">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
+            <Newspaper className="mx-auto h-12 w-12 text-slate-400 mb-3" />
+            <h1 className="text-xl font-bold text-slate-800">
+              {resolvedLocale === "ne"
+                ? "अहिले कुनै समाचार फेला परेन"
+                : "No news stories available yet"}
+            </h1>
+            <p className="mt-2 text-sm text-slate-500">
+              {resolvedLocale === "ne"
+                ? "कृपया केही समयपछि पुनः प्रयास गर्नुहोस् वा नयाँ समाचार अपडेट गर्नुहोस्।"
+                : "Please check back shortly or run the news fetcher."}
+            </p>
+          </div>
+        </main>
+        <Footer locale={resolvedLocale} />
+      </>
     );
+  }
+
+  // 1 dominant lead story + 3 secondary top stories
+  const leadStory = articles[0];
+  const secondaryStories = articles.slice(1, 4);
+  const feedStories = articles.slice(4);
+  const trendingStories = articles.slice(0, 5);
+
+  // Breaking ticker items
+  const tickerItems = articles.slice(0, 6).map((item) => ({
+    slug:
+      resolvedLocale === "ne" && "slugNe" in item ? item.slugNe : item.slug,
+    title: item.title[resolvedLocale],
+  }));
+
+  const leadSlug =
+    resolvedLocale === "ne" && "slugNe" in leadStory
+      ? leadStory.slugNe
+      : leadStory.slug;
+  const leadCategory = categoriesList.find((c) => c.slug === leadStory.category);
+  const leadCategoryName = leadCategory
+    ? leadCategory.name[resolvedLocale]
+    : leadStory.category;
+  const leadTheme = getCategoryTheme(leadStory.category);
+  const leadTimeAgo = formatRelativeTime(leadStory.publishedAt, resolvedLocale);
+
+  return (
+    <>
+      <Header locale={resolvedLocale} tickerItems={tickerItems} />
+
+      <main className="container-shell py-6 sm:py-8">
+        {/* ================================================================= */}
+        {/* §2 & §7: ONE DOMINANT LEAD STORY + 2-3 SECONDARY STORIES (HERO) */}
+        {/* ================================================================= */}
+        <section aria-label="Top Stories" className="mb-8">
+          <div className="grid gap-6 lg:grid-cols-[1.55fr_1fr]">
+            {/* DOMINANT LEAD STORY (The ONE bold moment per SKILL.md §7) */}
+            <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition hover:shadow-md">
+              <Link
+                href={`/${resolvedLocale}/article/${leadSlug}`}
+                className="relative aspect-[16/9] w-full overflow-hidden bg-slate-900 block"
+              >
+                <Image
+                  src={leadStory.image}
+                  alt={leadStory.imageAlt[resolvedLocale] || leadStory.title[resolvedLocale]}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 65vw"
+                  className="object-cover transition duration-500 group-hover:scale-103"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent sm:hidden" />
+                <div className="absolute bottom-3 left-3 sm:hidden text-white pr-3">
+                  <span
+                    className={`inline-block px-2.5 py-0.5 text-xs font-bold rounded-md ${leadTheme.bg} ${leadTheme.text} mb-1.5`}
+                  >
+                    {leadCategoryName}
+                  </span>
+                </div>
+              </Link>
+
+              <div className="flex flex-1 flex-col p-5 sm:p-7">
+                <div className="hidden sm:flex items-center gap-2.5 mb-3">
+                  <span
+                    className={`inline-block px-2.5 py-0.5 text-xs font-bold rounded-md border ${leadTheme.bg} ${leadTheme.text} ${leadTheme.border}`}
+                  >
+                    {leadCategoryName}
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="flex items-center gap-1 text-xs text-slate-500 font-medium">
+                    <Clock className="h-3 w-3 text-slate-400" />
+                    {leadTimeAgo}
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-xs text-slate-500 font-medium">
+                    {leadStory.source}
+                  </span>
+                </div>
+
+                <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold leading-tight tracking-tight text-slate-950 group-hover:text-red-700 transition">
+                  <Link href={`/${resolvedLocale}/article/${leadSlug}`}>
+                    {leadStory.title[resolvedLocale]}
+                  </Link>
+                </h1>
+
+                <p className="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 line-clamp-3">
+                  {leadStory.excerpt[resolvedLocale]}
+                </p>
+
+                <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <Link
+                    href={`/${resolvedLocale}/article/${leadSlug}`}
+                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-red-700 hover:text-red-800 transition"
+                  >
+                    <span>{resolvedLocale === "ne" ? "विस्तृत पढ्नुहोस्" : "Read full story"}</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                  <span className="text-xs text-slate-400">
+                    {leadStory.source}
+                  </span>
+                </div>
+              </div>
+            </article>
+
+            {/* 2-3 SECONDARY STORIES STACKED BESIDE LEAD */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <Flame className="h-4 w-4 text-red-600" />
+                  <span>{resolvedLocale === "ne" ? "विशेष खबरहरू" : "Top Highlights"}</span>
+                </h2>
+                <span className="text-xs text-slate-400">
+                  {resolvedLocale === "ne" ? "आजको चयन" : "Today's Picks"}
+                </span>
+              </div>
+
+              {secondaryStories.map((story) => {
+                const storySlug =
+                  resolvedLocale === "ne" && "slugNe" in story
+                    ? story.slugNe
+                    : story.slug;
+                const storyCat = categoriesList.find((c) => c.slug === story.category);
+                const storyCatName = storyCat ? storyCat.name[resolvedLocale] : story.category;
+                const storyTheme = getCategoryTheme(story.category);
+                const storyTimeAgo = formatRelativeTime(story.publishedAt, resolvedLocale);
+
+                return (
+                  <article
+                    key={story.slug}
+                    className="group relative flex gap-4 p-3.5 rounded-xl border border-slate-200/90 bg-white shadow-2xs hover:border-slate-300 hover:shadow-xs transition"
+                  >
+                    <div className="flex flex-1 flex-col justify-between min-w-0">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span
+                            className={`inline-block px-2 py-0.5 text-[10.5px] font-semibold rounded-xs ${storyTheme.bg} ${storyTheme.text}`}
+                          >
+                            {storyCatName}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-medium">
+                            {storyTimeAgo}
+                          </span>
+                        </div>
+                        <h3 className="text-sm sm:text-base font-bold leading-snug text-slate-950 group-hover:text-red-700 transition line-clamp-2">
+                          <Link href={`/${resolvedLocale}/article/${storySlug}`}>
+                            <span className="absolute inset-0" aria-hidden="true" />
+                            {story.title[resolvedLocale]}
+                          </Link>
+                        </h3>
+                      </div>
+                      <span className="text-[11px] text-slate-400 mt-2">
+                        {story.source}
+                      </span>
+                    </div>
+
+                    <div className="relative h-20 w-24 sm:h-22 sm:w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                      <Image
+                        src={story.image}
+                        alt={story.imageAlt[resolvedLocale] || story.title[resolvedLocale]}
+                        fill
+                        sizes="(max-width: 640px) 96px, 112px"
+                        className="object-cover transition duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================= */}
+        {/* §2 & §5: LEADERBOARD AD SLOT (Reserved fixed height, zero CLS) */}
+        {/* ================================================================= */}
+        <AdSlot variant="leaderboard" locale={resolvedLocale} />
+
+        {/* ================================================================= */}
+        {/* §2: MAIN FEED (DENSE IMAGE-LEFT ROWS) + SIDEBAR */}
+        {/* ================================================================= */}
+        <div className="grid gap-10 lg:grid-cols-[1fr_340px] items-start">
+          {/* LEFT: LATEST NEWS FEED */}
+          <section aria-label="Latest News">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-900">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-950 flex items-center gap-2">
+                <span className="inline-block h-3.5 w-1 bg-red-700 rounded-xs" />
+                <span>{resolvedLocale === "ne" ? "भर्खरका समाचार" : "Latest Stories"}</span>
+              </h2>
+              <span className="text-xs font-semibold text-slate-500">
+                {resolvedLocale === "ne" ? "समय अनुसार क्रमबद्ध" : "Chronological feed"}
+              </span>
+            </div>
+
+            <div className="divide-y divide-slate-200/80">
+              {feedStories.map((article, index) => (
+                <div key={article.slug}>
+                  <ArticleCard
+                    article={article}
+                    locale={resolvedLocale}
+                    layout="list-row"
+                  />
+                  {/* Insert native ad every 5th item per SKILL.md §2 & §5 */}
+                  {(index + 1) % 5 === 0 && index !== feedStories.length - 1 && (
+                    <AdSlot
+                      variant="in-feed"
+                      locale={resolvedLocale}
+                      className="my-4"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* RIGHT: DESKTOP SIDEBAR */}
+          <aside className="space-y-8 sticky top-20">
+            {/* 1. Daily Newsletter / News Digest Box */}
+            <NewsletterBox locale={resolvedLocale} />
+
+            {/* 2. Trending / Most Read Widget */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                  <TrendingUp className="h-4 w-4 text-red-600" />
+                  <span>{resolvedLocale === "ne" ? "धेरै पढिएका समाचार" : "Trending Stories"}</span>
+                </h3>
+                <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                  HOT
+                </span>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {trendingStories.map((story, i) => (
+                  <ArticleCard
+                    key={story.slug}
+                    article={story}
+                    locale={resolvedLocale}
+                    layout="compact"
+                    rank={i + 1}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Sidebar Ad Unit (300x250 with reserved height) */}
+            <AdSlot variant="sidebar" locale={resolvedLocale} />
+
+            {/* 4. Category Quick Explore */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-3 pb-2 border-b border-slate-100">
+                {resolvedLocale === "ne" ? "विषय अनुसार पढ्नुहोस्" : "Browse by Topic"}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {categoriesList.map((cat) => {
+                  const theme = getCategoryTheme(cat.slug);
+                  return (
+                    <Link
+                      key={cat.slug}
+                      href={`/${resolvedLocale}/category/${cat.slug}`}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition hover:scale-103 ${theme.bg} ${theme.text} ${theme.border}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${theme.dot}`} />
+                      <span>{resolvedLocale === "ne" ? cat.name.ne : cat.name.en}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 5. Journalistic Transparency Card */}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-xs text-slate-600 leading-relaxed">
+              <div className="flex items-center gap-1.5 font-bold text-slate-800 mb-1.5">
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <span>
+                  {resolvedLocale === "ne"
+                    ? "पारदर्शी समाचार संकलन"
+                    : "Sourced & Verified"}
+                </span>
+              </div>
+              <p>
+                {resolvedLocale === "ne"
+                  ? "हामी अनलाइनखबर, सेतोपाटी, रातोपाटी लगायतका प्रतिष्ठित नेपाली समाचार गृहहरूबाट तथ्यपरक सामग्री द्विभाषिक रूपमा प्रस्तुत गर्दछौं।"
+                  : "All stories aggregate verified reporting directly from Nepal's top national media houses with full attribution."}
+              </p>
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      <ScrollToTop />
+      <Footer locale={resolvedLocale} />
+    </>
+  );
 }

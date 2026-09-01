@@ -1,39 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
+  --background: #fafaf8;
   --foreground: #0f172a;
   --card: #ffffff;
   --muted: #475569;
-  --accent: #0f766e;
-  --accent-strong: #134e4a;
-  --border: rgba(15, 23, 42, 0.08);
+  --accent: #b91c1c; /* Nepal News Crimson */
+  --accent-hover: #991b1b;
+  --border: #e2e8f0;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-geist-sans), var(--font-devanagari), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
+
 html {
   scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-devanagari), var(--font-geist-sans), "Segoe UI", Arial, sans-serif;
+  min-height: 100vh;
 }
-
 
 * {
   box-sizing: border-box;
 }
+
 button,
 input,
 nav,
-.font-display {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-devanagari), var(--font-geist-sans), "Segoe UI", Arial, sans-serif;
 }
 
@@ -43,44 +47,124 @@ img {
 }
 
 .container-shell {
-  width: min(1200px, calc(100% - 32px));
+  width: min(1240px, calc(100% - 28px));
   margin: 0 auto;
 }
 
+@media (min-width: 640px) {
+  .container-shell {
+    width: min(1240px, calc(100% - 40px));
+  }
+}
+
+/* Hide scrollbar for clean category rail */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Typography for News Reading Experience (SKILL.md §2 & §3) */
+.article-body {
+  color: #1e293b;
+  line-height: 1.75;
+}
+
 .article-body p {
-  margin-bottom: 1.4rem;
-  color: #334155;
-  max-width: 78ch;
-  font-size: 1.18rem;
-  line-height: 2.1;
+  margin-bottom: 1.5rem;
+  max-width: 68ch;
+  line-height: 1.75;
+  color: #1e293b;
 }
 
 .article-body .article-lead {
-  color: #0f172a;
-  font-size: 1.38rem;
+  font-size: 1.25em;
+  line-height: 1.7;
   font-weight: 600;
-  line-height: 1.9;
+  color: #0f172a;
+  border-left: 3px solid #b91c1c;
+  padding-left: 1rem;
+  margin-bottom: 1.75rem;
 }
 
 .article-body h2 {
-  margin: 2.2rem 0 1rem;
-  max-width: 78ch;
-  font-size: 1.7rem;
+  margin: 2.5rem 0 1rem;
+  max-width: 68ch;
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #0f172a;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.article-body h3 {
+  margin: 2rem 0 0.75rem;
+  max-width: 68ch;
+  font-size: 1.25em;
   font-weight: 700;
   color: #0f172a;
 }
 
 .article-body a {
-  color: #0f766e;
+  color: #b91c1c;
   text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
 }
 
-.ad-slot {
-  border: 1px dashed rgba(15, 118, 110, 0.4);
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 1rem;
+.article-body a:hover {
+  color: #991b1b;
+}
+
+.article-body ul, .article-body ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+  max-width: 68ch;
+}
+
+.article-body li {
+  margin-bottom: 0.5rem;
+}
+
+.article-body blockquote {
+  border-left: 4px solid #b91c1c;
+  padding-left: 1.25rem;
+  font-style: italic;
+  color: #334155;
+  margin: 1.75rem 0;
 }
 
 .text-balance {
   text-wrap: balance;
+}
+
+/* ========================================================================= */
+/* Print Mode Optimization (Newspaper Style) */
+/* ========================================================================= */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+  }
+  header, footer, nav, .no-print, .ad-container, .ad-slot, button {
+    display: none !important;
+  }
+  .container-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .article-body {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
 }

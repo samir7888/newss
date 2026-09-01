@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 const devanagari = Noto_Sans_Devanagari({
   variable: "--font-devanagari",
   subsets: ["devanagari"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const siteUrl =
@@ -25,7 +26,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ताजा समाचार | Taaja Samachar | Nepal News",
+    default: "ताजा समाचार | Taaja Samachar | Nepal News Pulse",
     template: "%s | ताजा समाचार",
   },
   description:
@@ -78,10 +79,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="ne" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} h-full antialiased`}>
-      <body className="min-h-full bg-slate-100 text-slate-900">{children}</body>
+    <html
+      lang="ne"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} h-full antialiased`}
+    >
+      <body className="min-h-full bg-[#FAFAF8] text-slate-900 font-sans">
+        {children}
+      </body>
     </html>
   );
 }

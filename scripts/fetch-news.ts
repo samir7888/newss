@@ -351,6 +351,43 @@ function resolveImageUrl(value: string, baseUrl: string) {
   return value;
 }
 
+function isJunkParagraph(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length < 20) return true;
+
+  const junkPatterns = [
+    // Nepali news site reaction/emoji labels
+    /^(खुसी|दुःखी|अचम्मित|उत्साहित|आक्रोशित|हास्यास्पद|चिन्ताजनक)$/,
+    // Site branding / taglines
+    /^(अनलाइनखबर|सेतोपाटी|रातोपाटी|नागरिक|नागरिकन्यूज)$/i,
+    /सबैको.*सबैभन्दा राम्रो/,
+    /डटकम।$/,
+    // Auth / UI elements
+    /^forgot password/i,
+    /^sign\s*(in|up)/i,
+    /^log\s*(in|out)/i,
+    /^subscribe/i,
+    /^share\s/i,
+    /^tags?\s*:/i,
+    /^related\s/i,
+    /^also\s+read/i,
+    /पनि पढ्नुहोस्/,
+    /यो पनि हेर्नुहोस्/,
+    /^तपाईंको प्रतिक्रिया/,
+    // Copyright / legal
+    /^copyright/i,
+    /©\s*\d{4}/i,
+    /all rights reserved/i,
+    /सर्वाधिकार सुरक्षित/,
+    // Contact info / addresses
+    /\[email\s*protected\]/i,
+    /^Bakhundole/i,
+    /^\d{2,3}-\d{6,8}/,
+  ];
+
+  return junkPatterns.some((pattern) => pattern.test(trimmed));
+}
+
 function extractPageData(
   html: string,
   fallback: { title: string; snippet: string; source: string; link: string },
@@ -422,6 +459,8 @@ function extractPageData(
         ? structuredData.articleBody.join("\n\n")
         : "";
 
+
+
   const sourceSelectors = [
     "article p",
     ".article-content p",
@@ -442,23 +481,28 @@ function extractPageData(
         .replace(/<[^>]+>/g, " ")
         .split(/\n{2,}|\.(?=\s+[A-Z])/)
         .map((part) => cleanText(part))
-        .filter((part) => part.length > 30);
+        .filter((part) => part.length > 20 && !isJunkParagraph(part));
       extracted.push(...split);
     }
 
     for (const selector of sourceSelectors) {
-      if (extracted.length >= 6) break;
+      // Once we have enough from a scoped selector, skip broader ones
+      if (extracted.length >= 50) break;
       const nodes = $(selector).toArray();
       for (const node of nodes) {
         const text = cleanText($(node).text());
-        if (!text || text.length <= 30) continue;
+        if (!text || text.length <= 20) continue;
+        if (isJunkParagraph(text)) continue;
         if (extracted.some((item) => item === text)) continue;
         extracted.push(text);
-        if (extracted.length >= 6) break;
       }
+      // If a scoped selector found content, don't fall through to broader ones
+      if (extracted.length > 0 && selector !== "p") break;
     }
 
-    return extracted.filter((paragraph) => paragraph.length > 30).slice(0, 8);
+    return extracted.filter(
+      (paragraph) => paragraph.length > 20 && !isJunkParagraph(paragraph),
+    );
   })();
 
   const titleFromSelectors = siteRules.title
@@ -538,6 +582,8 @@ function extractPageData(
           excerpt || fallback.snippet,
           `This story was originally published by ${fallback.source}. The source link is included below for direct review and additional context.`,
         ];
+
+
 
   return {
     title,
@@ -679,7 +725,7 @@ async function toArticlePayload(entry: {
     pageData.excerpt || entry.snippet || "Fresh reporting from Nepal.";
   const normalizedBody = pageData.body
     .map((paragraph) => cleanText(paragraph))
-    .filter((paragraph) => paragraph.length > 40)
+    .filter((paragraph) => paragraph.length > 25 && !isJunkParagraph(paragraph))
     .join("\n\n");
   const bodyText = normalizedBody || `${title}. ${excerpt}`;
   const sourceCategory = inferCategorySlugFromText(
