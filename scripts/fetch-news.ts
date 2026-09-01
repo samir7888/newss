@@ -16,8 +16,19 @@ import {
 
 config({ path: ".env.local" });
 
+const MAX_SCRIPT_RUNTIME_MS = 210_000; // 3.5 minutes max
+const scriptStartTime = Date.now();
+
+export function getRemainingTimeMs(): number {
+  return Math.max(0, MAX_SCRIPT_RUNTIME_MS - (Date.now() - scriptStartTime));
+}
+
+export function hasTimeRemaining(bufferMs = 15_000): boolean {
+  return getRemainingTimeMs() > bufferMs;
+}
+
 const parser = new Parser({
-  timeout: 10000,
+  timeout: 6000,
   headers: {
     "User-Agent":
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
@@ -215,10 +226,10 @@ export function cleanText(value: string | null | undefined) {
     .trim();
 }
 
-async function fetchHtml(url: string) {
+async function fetchHtml(url: string, timeoutMs = 5000): Promise<string | null> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     const response = await fetch(url, {
       signal: controller.signal,
@@ -231,9 +242,13 @@ async function fetchHtml(url: string) {
       redirect: "follow",
     });
 
+    if (!response.ok) {
+      clearTimeout(timeoutId);
+      return null;
+    }
+    const html = await response.text();
     clearTimeout(timeoutId);
-    if (!response.ok) return null;
-    return await response.text();
+    return html;
   } catch {
     return null;
   }
@@ -543,7 +558,7 @@ function extractPageData(
     ];
 
     for (const selector of sourceSelectors) {
-      if (extracted.length >= 80) break;
+      if (extracted.length >= 8) break;
       const nodes = $(selector).toArray();
       for (const node of nodes) {
         const text = cleanText($(node).text());
@@ -551,8 +566,9 @@ function extractPageData(
         if (isJunkParagraph(text)) continue;
         if (extracted.some((item) => item === text)) continue;
         extracted.push(text);
+        if (extracted.length >= 8) break;
       }
-      if (extracted.length >= 6 && selector !== "main p") break;
+      if (extracted.length >= 4 && selector !== "main p") break;
     }
 
     return extracted.filter(
@@ -668,9 +684,12 @@ export function isInvalidTranslationText(text: string | null | undefined): boole
   );
 }
 
+const translationCache = new Map<string, string>();
+
 export async function translateSingle(
   value: string,
   target: "en" | "ne",
+  timeoutMs = 3000,
 ): Promise<string> {
   const trimmed = value.trim();
   if (!trimmed) return "";
@@ -678,9 +697,14 @@ export async function translateSingle(
   if (target === "ne" && hasDevanagari(trimmed)) return trimmed;
   if (target === "en" && !hasDevanagari(trimmed) && !isInvalidTranslationText(trimmed)) return trimmed;
 
+  const cacheKey = `${target}:${trimmed}`;
+  if (translationCache.has(cacheKey)) {
+    return translationCache.get(cacheKey)!;
+  }
+
   const source = target === "en" ? "ne" : "en";
 
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     // 1. Google Translate GTX
     try {
       const url = new URL("https://translate.googleapis.com/translate_a/single");
@@ -691,7 +715,7 @@ export async function translateSingle(
       url.searchParams.set("q", trimmed);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       const response = await fetch(url.toString(), {
         headers: {
           "User-Agent":
@@ -699,18 +723,18 @@ export async function translateSingle(
         },
         signal: controller.signal,
       });
+      const data = response.ok ? ((await response.json()) as Array<Array<[string]>>) : null;
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const result = (await response.json()) as Array<Array<[string]>>;
-        const translated =
-          result[0]?.map((part) => part[0]).join("") || "";
+      if (data && Array.isArray(data[0])) {
+        const translated = data[0].map((part) => part[0]).join("") || "";
         if (
           translated &&
           !isInvalidTranslationText(translated) &&
           ((target === "ne" && hasDevanagari(translated)) ||
             (target === "en" && !hasDevanagari(translated)))
         ) {
+          translationCache.set(cacheKey, translated);
           return translated;
         }
       }
@@ -727,7 +751,7 @@ export async function translateSingle(
       dictUrl.searchParams.set("q", trimmed);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       const dictResponse = await fetch(dictUrl.toString(), {
         headers: {
           "User-Agent":
@@ -735,17 +759,18 @@ export async function translateSingle(
         },
         signal: controller.signal,
       });
+      const dictResult = dictResponse.ok ? await dictResponse.json() : null;
       clearTimeout(timeoutId);
 
-      if (dictResponse.ok) {
-        const dictResult = (await dictResponse.json()) as string[];
-        const translated = Array.isArray(dictResult) ? dictResult[0] : "";
+      if (dictResult) {
+        const translated = Array.isArray(dictResult) ? dictResult[0] : typeof dictResult === "string" ? dictResult : "";
         if (
           translated &&
           !isInvalidTranslationText(translated) &&
           ((target === "ne" && hasDevanagari(translated)) ||
             (target === "en" && !hasDevanagari(translated)))
         ) {
+          translationCache.set(cacheKey, translated);
           return translated;
         }
       }
@@ -759,33 +784,37 @@ export async function translateSingle(
       fallbackUrl.searchParams.set("q", trimmed);
       fallbackUrl.searchParams.set("langpair", `${source}|${target}`);
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       const fbResponse = await fetch(fallbackUrl.toString(), {
         signal: controller.signal,
       });
+      const fbResult = fbResponse.ok
+        ? ((await fbResponse.json()) as {
+            responseData?: { translatedText?: string };
+            responseStatus?: number;
+          })
+        : null;
       clearTimeout(timeoutId);
 
-      if (fbResponse.ok) {
-        const fbResult = (await fbResponse.json()) as {
-          responseData?: { translatedText?: string };
-          responseStatus?: number;
-        };
+      if (fbResult && fbResult.responseStatus === 200) {
         const text = fbResult.responseData?.translatedText;
-        if (
-          text &&
-          fbResult.responseStatus === 200 &&
-          !isInvalidTranslationText(text)
-        ) {
-          if (target === "ne" && hasDevanagari(text)) return text;
-          if (target === "en" && !hasDevanagari(text)) return text;
+        if (text && !isInvalidTranslationText(text)) {
+          if (target === "ne" && hasDevanagari(text)) {
+            translationCache.set(cacheKey, text);
+            return text;
+          }
+          if (target === "en" && !hasDevanagari(text)) {
+            translationCache.set(cacheKey, text);
+            return text;
+          }
         }
       }
     } catch {
       // Ignore
     }
 
-    if (attempt < 2) {
-      await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+    if (attempt === 0 && hasTimeRemaining(30_000)) {
+      await new Promise((r) => setTimeout(r, 200));
     }
   }
 
@@ -796,40 +825,45 @@ export async function translateParagraphList(
   paragraphs: string[],
   target: "en" | "ne",
 ): Promise<string[]> {
+  const validParagraphs = paragraphs
+    .map((p) => cleanText(p))
+    .filter((p) => p.length > 0 && !isInvalidTranslationText(p))
+    .slice(0, 5);
+
+  if (validParagraphs.length === 0) return [];
+
   const results: string[] = [];
-  for (const paragraph of paragraphs) {
-    const cleanP = cleanText(paragraph);
-    if (!cleanP || isInvalidTranslationText(cleanP)) continue;
-    try {
-      const translated = await translateSingle(cleanP, target);
-      if (!isInvalidTranslationText(translated)) {
-        results.push(translated);
-      } else {
-        results.push(cleanP);
-      }
-      // Small pause between paragraphs to avoid rate-limiting
-      await new Promise((r) => setTimeout(r, 150));
-    } catch (err) {
-      console.warn(`Translation error for paragraph: ${(err as Error).message}`);
-      results.push(cleanP);
-    }
+  const batchSize = 3;
+  for (let i = 0; i < validParagraphs.length; i += batchSize) {
+    const batch = validParagraphs.slice(i, i + batchSize);
+    const translatedBatch = await Promise.all(
+      batch.map(async (cleanP) => {
+        try {
+          const translated = await translateSingle(cleanP, target);
+          return !isInvalidTranslationText(translated) ? translated : cleanP;
+        } catch {
+          return cleanP;
+        }
+      }),
+    );
+    results.push(...translatedBatch);
   }
+
   return results;
 }
 
 async function fetchFeedEntries() {
-  const entries: Array<{
-    title: string;
-    link: string;
-    snippet: string;
-    category: string;
-    source: string;
-  }> = [];
-
-  for (const feed of defaultFeeds) {
+  const feedPromises = defaultFeeds.map(async (feed) => {
     try {
       const parsed = await parser.parseURL(feed.url);
       const items = (parsed.items ?? []).slice(0, 5);
+      const feedEntries: Array<{
+        title: string;
+        link: string;
+        snippet: string;
+        category: string;
+        source: string;
+      }> = [];
 
       for (const item of items) {
         const title = (item.title ?? "Untitled update").trim();
@@ -838,7 +872,7 @@ async function fetchFeedEntries() {
         const snippet =
           item.contentSnippet ?? item.content ?? "Fresh reporting from Nepal.";
 
-        entries.push({
+        feedEntries.push({
           title,
           link: item.link ?? `https://example.com/${encodeURIComponent(title)}`,
           snippet,
@@ -846,8 +880,25 @@ async function fetchFeedEntries() {
           source: feed.name,
         });
       }
+      return feedEntries;
     } catch (error) {
       console.warn(`Skipping feed ${feed.name}: ${(error as Error).message}`);
+      return [];
+    }
+  });
+
+  const settled = await Promise.allSettled(feedPromises);
+  const entries: Array<{
+    title: string;
+    link: string;
+    snippet: string;
+    category: string;
+    source: string;
+  }> = [];
+
+  for (const res of settled) {
+    if (res.status === "fulfilled") {
+      entries.push(...res.value);
     }
   }
 
@@ -1011,151 +1062,155 @@ export async function runNewsFetch() {
     }
   }
 
-  const processedPayload = await Promise.all(
-    unique.slice(0, 8).map(async (entry) => {
-      try {
-        const fallbackTitle = entry.title.trim();
-        const fetched = await fetchHtml(entry.link);
-        const pageData = fetched
-          ? extractPageData(fetched, {
-              title: fallbackTitle,
-              snippet: entry.snippet,
-              source: entry.source,
-              link: entry.link,
-            })
-          : {
-              title: fallbackTitle,
-              excerpt: entry.snippet,
-              body: [entry.snippet],
-              imageUrl: buildUnsplashImageUrl(entry.category),
-              publishedAt: new Date().toISOString(),
-            };
+  const selectedCandidates = unique.slice(0, 6);
+  const processedPayload: Array<any> = [];
 
-        const rawTitle = pageData.title || fallbackTitle;
-        const rawExcerpt =
-          pageData.excerpt || entry.snippet || "Fresh reporting from Nepal.";
-        const rawBodyParagraphs = pageData.body
-          .map((p) => cleanText(p))
-          .filter((p) => p.length > 20 && !isJunkParagraph(p));
+  for (const entry of selectedCandidates) {
+    if (!hasTimeRemaining(25_000)) {
+      console.warn("Time limit approaching. Finalizing already fetched stories.");
+      break;
+    }
 
-        const sourceIsNepali =
-          hasDevanagari(rawTitle) ||
-          hasDevanagari(rawExcerpt) ||
-          rawBodyParagraphs.some(hasDevanagari);
+    try {
+      const fallbackTitle = entry.title.trim();
+      const fetched = await fetchHtml(entry.link, 5000);
+      const pageData = fetched
+        ? extractPageData(fetched, {
+            title: fallbackTitle,
+            snippet: entry.snippet,
+            source: entry.source,
+            link: entry.link,
+          })
+        : {
+            title: fallbackTitle,
+            excerpt: entry.snippet,
+            body: [entry.snippet],
+            imageUrl: buildUnsplashImageUrl(entry.category),
+            publishedAt: new Date().toISOString(),
+          };
 
-        let titleEn = "";
-        let titleNe = "";
-        let excerptEn = "";
-        let excerptNe = "";
-        let englishParagraphs: string[] = [];
-        let nepaliParagraphs: string[] = [];
+      const rawTitle = pageData.title || fallbackTitle;
+      const rawExcerpt =
+        pageData.excerpt || entry.snippet || "Fresh reporting from Nepal.";
+      const rawBodyParagraphs = pageData.body
+        .map((p) => cleanText(p))
+        .filter((p) => p.length > 20 && !isJunkParagraph(p))
+        .slice(0, 6);
 
-        if (sourceIsNepali) {
-          // Source is Nepali: preserve original Nepali and translate to English
-          titleNe = rawTitle;
-          excerptNe = rawExcerpt;
-          nepaliParagraphs =
-            rawBodyParagraphs.length > 0 ? rawBodyParagraphs : [rawExcerpt];
+      const sourceIsNepali =
+        hasDevanagari(rawTitle) ||
+        hasDevanagari(rawExcerpt) ||
+        rawBodyParagraphs.some(hasDevanagari);
 
-          titleEn = await translateSingle(rawTitle, "en");
-          excerptEn = await translateSingle(rawExcerpt, "en");
-          englishParagraphs = await translateParagraphList(
-            nepaliParagraphs,
-            "en",
-          );
+      let titleEn = "";
+      let titleNe = "";
+      let excerptEn = "";
+      let excerptNe = "";
+      let englishParagraphs: string[] = [];
+      let nepaliParagraphs: string[] = [];
 
-          // If English translation retained Devanagari due to fallback or is an error, clean it
-          if (hasDevanagari(titleEn) || isInvalidTranslationText(titleEn)) {
-            titleEn = "Nepal News: " + entry.source;
-          }
-          if (hasDevanagari(excerptEn) || isInvalidTranslationText(excerptEn)) {
-            excerptEn = "Latest reporting and updates from Nepal.";
-          }
-          englishParagraphs = englishParagraphs
-            .filter((p) => !isInvalidTranslationText(p))
-            .map((p) =>
-              hasDevanagari(p)
-                ? `Reported developments regarding this story continue to unfold from ${entry.source}.`
-                : p,
-            );
-        } else {
-          // Source is English: preserve original English and translate to Nepali
-          titleEn = rawTitle;
-          excerptEn = rawExcerpt;
-          englishParagraphs =
-            rawBodyParagraphs.length > 0 ? rawBodyParagraphs : [rawExcerpt];
+      if (sourceIsNepali) {
+        // Source is Nepali: preserve original Nepali and translate to English
+        titleNe = rawTitle;
+        excerptNe = rawExcerpt;
+        nepaliParagraphs =
+          rawBodyParagraphs.length > 0 ? rawBodyParagraphs : [rawExcerpt];
 
-          titleNe = await translateSingle(rawTitle, "ne");
-          excerptNe = await translateSingle(rawExcerpt, "ne");
-          nepaliParagraphs = await translateParagraphList(
-            englishParagraphs,
-            "ne",
-          );
-
-          if (!hasDevanagari(titleNe) || isInvalidTranslationText(titleNe)) {
-            titleNe = rawTitle;
-          }
-          if (!hasDevanagari(excerptNe) || isInvalidTranslationText(excerptNe)) {
-            excerptNe = rawExcerpt;
-          }
-          nepaliParagraphs = nepaliParagraphs.filter((p) => !isInvalidTranslationText(p));
-        }
-
-        const sourceCategory = inferCategorySlugFromText(
-          titleEn || titleNe,
-          `${excerptEn} ${englishParagraphs.join(" ")}`,
-          entry.category,
+        titleEn = await translateSingle(rawTitle, "en");
+        excerptEn = await translateSingle(rawExcerpt, "en");
+        englishParagraphs = await translateParagraphList(
+          nepaliParagraphs,
+          "en",
         );
 
-        const slugSeed =
-          (!isInvalidTranslationText(titleEn) && titleEn) ||
-          (!isInvalidTranslationText(rawTitle) && rawTitle) ||
-          "nepal-news";
-        const slug = makeSlug(slugSeed);
-        const timestamp = Date.now();
+        // If English translation retained Devanagari due to fallback or is an error, clean it
+        if (hasDevanagari(titleEn) || isInvalidTranslationText(titleEn)) {
+          titleEn = "Nepal News: " + entry.source;
+        }
+        if (hasDevanagari(excerptEn) || isInvalidTranslationText(excerptEn)) {
+          excerptEn = "Latest reporting and updates from Nepal.";
+        }
+        englishParagraphs = englishParagraphs
+          .filter((p) => !isInvalidTranslationText(p))
+          .map((p) =>
+            hasDevanagari(p)
+              ? `Reported developments regarding this story continue to unfold from ${entry.source}.`
+              : p,
+          );
+      } else {
+        // Source is English: preserve original English and translate to Nepali
+        titleEn = rawTitle;
+        excerptEn = rawExcerpt;
+        englishParagraphs =
+          rawBodyParagraphs.length > 0 ? rawBodyParagraphs : [rawExcerpt];
 
-        const bodyEnHtml = toRichHtml(englishParagraphs.join("\n\n"), "en");
-        const bodyNeHtml = toRichHtml(
-          normalizeNepaliText(nepaliParagraphs.join("\n\n")),
+        titleNe = await translateSingle(rawTitle, "ne");
+        excerptNe = await translateSingle(rawExcerpt, "ne");
+        nepaliParagraphs = await translateParagraphList(
+          englishParagraphs,
           "ne",
         );
 
-        return {
-          slugEn: `${slug}-en-${timestamp}`,
-          slugNe: `${slug}-ne-${timestamp}`,
-          titleEn,
-          titleNe,
-          excerptEn,
-          excerptNe,
-          bodyEn: bodyEnHtml,
-          bodyNe: bodyNeHtml,
-          metaDescriptionEn: excerptEn.slice(0, 155),
-          metaDescriptionNe: excerptNe.slice(0, 150),
-          sourceUrl: entry.link,
-          sourceHeadline: rawTitle,
-          contentHash: contentHash(entry.title),
-          imageUrl: pageData.imageUrl || buildUnsplashImageUrl(sourceCategory),
-          imageAlt: `${titleEn || titleNe} image`,
-          imageCredit: entry.source,
-          sourceName: entry.source,
-          publishedAt: new Date(pageData.publishedAt),
-          status: "published",
-          category: sourceCategory,
-          hash: contentHash(entry.title),
-          title: entry.title,
-        };
-      } catch (error) {
-        console.warn(
-          `Failed processing entry "${entry.title}": ${(error as Error).message}`,
-        );
-        return null;
+        if (!hasDevanagari(titleNe) || isInvalidTranslationText(titleNe)) {
+          titleNe = rawTitle;
+        }
+        if (!hasDevanagari(excerptNe) || isInvalidTranslationText(excerptNe)) {
+          excerptNe = rawExcerpt;
+        }
+        nepaliParagraphs = nepaliParagraphs.filter((p) => !isInvalidTranslationText(p));
       }
-    }),
-  );
 
-  const payload = processedPayload.filter(
-    (article): article is NonNullable<typeof article> => article !== null,
-  );
+      const sourceCategory = inferCategorySlugFromText(
+        titleEn || titleNe,
+        `${excerptEn} ${englishParagraphs.join(" ")}`,
+        entry.category,
+      );
+
+      const slugSeed =
+        (!isInvalidTranslationText(titleEn) && titleEn) ||
+        (!isInvalidTranslationText(rawTitle) && rawTitle) ||
+        "nepal-news";
+      const slug = makeSlug(slugSeed);
+      const timestamp = Date.now();
+
+      const bodyEnHtml = toRichHtml(englishParagraphs.join("\n\n"), "en");
+      const bodyNeHtml = toRichHtml(
+        normalizeNepaliText(nepaliParagraphs.join("\n\n")),
+        "ne",
+      );
+
+      processedPayload.push({
+        slugEn: `${slug}-en-${timestamp}`,
+        slugNe: `${slug}-ne-${timestamp}`,
+        titleEn,
+        titleNe,
+        excerptEn,
+        excerptNe,
+        bodyEn: bodyEnHtml,
+        bodyNe: bodyNeHtml,
+        metaDescriptionEn: excerptEn.slice(0, 155),
+        metaDescriptionNe: excerptNe.slice(0, 150),
+        sourceUrl: entry.link,
+        sourceHeadline: rawTitle,
+        contentHash: contentHash(entry.title),
+        imageUrl: pageData.imageUrl || buildUnsplashImageUrl(sourceCategory),
+        imageAlt: `${titleEn || titleNe} image`,
+        imageCredit: entry.source,
+        sourceName: entry.source,
+        publishedAt: new Date(pageData.publishedAt),
+        status: "published",
+        category: sourceCategory,
+        hash: contentHash(entry.title),
+        title: entry.title,
+      });
+    } catch (error) {
+      console.warn(
+        `Failed processing entry "${entry.title}": ${(error as Error).message}`,
+      );
+    }
+  }
+
+  const payload = processedPayload;
 
   const updatedCache = [
     ...existing,
@@ -1190,20 +1245,28 @@ export async function runNewsFetch() {
 }
 
 if (isDirectRun) {
+  const globalSafetyTimer = setTimeout(() => {
+    console.warn("Global safety timeout reached (230s). Terminating process.");
+    process.exit(0);
+  }, 230_000);
+  globalSafetyTimer.unref();
+
   runNewsFetch()
     .then(() => {
-      process.exitCode = 0;
+      console.log("News fetch cycle completed successfully.");
     })
     .catch((error) => {
       console.error("News fetch failed:", error);
-      process.exitCode = 0; // Don't fail the whole CI if external sites are temporarily unreachable
     })
-    .finally(() =>
-      closeDatabase().catch((error) => {
+    .finally(async () => {
+      try {
+        await closeDatabase();
+      } catch (error) {
         console.warn(
           "Database connection close failed:",
           (error as Error).message,
         );
-      }),
-    );
+      }
+      process.exit(0);
+    });
 }
