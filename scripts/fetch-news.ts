@@ -228,10 +228,13 @@ export function cleanText(value: string | null | undefined) {
 
 async function fetchHtml(url: string, timeoutMs = 5000): Promise<string | null> {
   try {
+    const cleanUrl = (url ?? "").trim();
+    if (!cleanUrl || !cleanUrl.startsWith("http")) return null;
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    const response = await fetch(url, {
+    const response = await fetch(cleanUrl, {
       signal: controller.signal,
       headers: {
         "User-Agent":
@@ -285,9 +288,18 @@ function getSourceSelectors(url: string) {
       ],
     },
     "setopati.com": {
-      title: ["h1", ".news-title", ".headline"],
-      description: ["meta[name='description']", ".summary", ".lead"],
+      title: ["h1", ".news-big-title", ".news-title", ".headline"],
+      description: [
+        "meta[name='description']",
+        ".news-sub-heading",
+        ".summary",
+        ".lead",
+      ],
       body: [
+        ".editor-box p",
+        ".content-editor p",
+        ".news-detail-section p",
+        ".detail-box p",
         "article p",
         ".content p",
         ".article-content p",
@@ -872,9 +884,10 @@ async function fetchFeedEntries() {
         const snippet =
           item.contentSnippet ?? item.content ?? "Fresh reporting from Nepal.";
 
+        const cleanLink = (item.link ?? "").trim();
         feedEntries.push({
           title,
-          link: item.link ?? `https://example.com/${encodeURIComponent(title)}`,
+          link: cleanLink || `https://example.com/${encodeURIComponent(title)}`,
           snippet,
           category: getCategory(title, snippet, feed.category),
           source: feed.name,
