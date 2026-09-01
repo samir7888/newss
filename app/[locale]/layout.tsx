@@ -8,10 +8,19 @@ export function generateStaticParams() {
 
 export const metadata: Metadata = {
     title: {
-        default: "Nepal News Pulse",
-        template: "%s | Nepal News Pulse",
+        default: "ताजा समाचार | Taaja Samachar",
+        template: "%s | Taaja Samachar",
     },
-    description: "Trending Nepal news and analysis in English and Nepali.",
+    description: "ताजा नेपाली समाचार, नेपालका मुख्य खबर र विश्वसनीय समाचार अपडेट।",
+    keywords: [
+        "नेपाली समाचार",
+        "ताजा समाचार",
+        "नेपाल समाचार",
+        "आजको समाचार",
+        "Nepali samachar",
+        "Nepal news",
+        "latest Nepal news",
+    ],
 };
 
 export default function LocaleLayout({ children }: { children: React.ReactNode }) {
