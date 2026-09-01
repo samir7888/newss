@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 import { getLatestArticles } from "@/lib/news-data";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ||
   process.env.NEXT_PUBLIC_SITE_URL ||
   "http://localhost:3000";
 const origin = siteUrl.replace(/\/$/, "");
