@@ -12,13 +12,16 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { toRichHtml } from "@/lib/article-content";
-import { getArticleBySlug, getCategories, getRelatedArticles } from "@/lib/news-data";
+import { getAllArticleSlugs, getArticleBySlug, getCategories, getRelatedArticles } from "@/lib/news-data";
 import { formatFullDate, formatRelativeTime, calculateReadTime } from "@/lib/format-date";
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Locale } from "@/lib/site";
 
-export function generateStaticParams() {
-  return [{ locale: "ne" }, { locale: "en" }];
+export const revalidate = 60; // Revalidate every 1 minute (60s)
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  return await getAllArticleSlugs();
 }
 
 export async function generateMetadata({

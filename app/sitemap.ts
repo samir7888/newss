@@ -10,6 +10,8 @@ const siteUrl =
   "http://localhost:3000";
 const origin = siteUrl.replace(/\/$/, "");
 
+export const revalidate = 60; // Revalidate sitemap every 1 minute
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await getLatestArticles(200);
 

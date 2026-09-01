@@ -11,6 +11,9 @@ import { getArticlesByCategory, getCategories, getLatestArticles } from "@/lib/n
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Locale } from "@/lib/site";
 
+export const revalidate = 60; // Revalidate every 1 minute (60s)
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   return [
     { locale: "ne", slug: "politics" },

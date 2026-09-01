@@ -6,6 +6,8 @@ import { Header } from "@/components/layout/Header";
 import { searchArticles, getCategories } from "@/lib/news-data";
 import type { Locale } from "@/lib/site";
 
+export const revalidate = 60; // Revalidate every 1 minute (60s)
+
 export default async function SearchPage({
   params,
   searchParams,

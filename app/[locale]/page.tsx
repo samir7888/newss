@@ -13,6 +13,8 @@ import { formatRelativeTime } from "@/lib/format-date";
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Locale } from "@/lib/site";
 
+export const revalidate = 60; // Revalidate every 1 minute (60s)
+
 export function generateStaticParams() {
   return [{ locale: "ne" }, { locale: "en" }];
 }
