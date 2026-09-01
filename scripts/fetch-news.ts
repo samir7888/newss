@@ -42,11 +42,15 @@ const defaultFeeds = [
     url: process.env.FEED_URL_1 || "https://www.onlinekhabar.com/feed",
     category: "economy",
   },
-  {
-    name: "Setopati",
-    url: process.env.FEED_URL_2 || "https://www.setopati.com/feed",
-    category: "politics",
-  },
+
+ // as this has no proper html structure
+  // {
+  //   name: "Setopati",
+  //   url: process.env.FEED_URL_2 || "https://www.setopati.com/feed",
+  //   category: "politics",
+  // },
+
+
   {
     name: "Ratopati",
     url: process.env.FEED_URL_3 || "https://www.ratopati.com/feed",
@@ -287,32 +291,34 @@ function getSourceSelectors(url: string) {
         ".story-image img",
       ],
     },
-    "setopati.com": {
-      title: ["h1", ".news-big-title", ".news-title", ".headline"],
-      description: [
-        "meta[name='description']",
-        ".news-sub-heading",
-        ".summary",
-        ".lead",
-      ],
-      body: [
-        ".editor-box p",
-        ".content-editor p",
-        ".news-detail-section p",
-        ".detail-box p",
-        "article p",
-        ".content p",
-        ".article-content p",
-        ".story-content p",
-        ".news-content p",
-      ],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".content img",
-        ".news-image img",
-      ],
-    },
+
+    // Setopati has no proper html structure to extract the data
+    // "setopati.com": {
+    //   title: ["h1", ".news-big-title", ".news-title", ".headline"],
+    //   description: [
+    //     "meta[name='description']",
+    //     ".news-sub-heading",
+    //     ".summary",
+    //     ".lead",
+    //   ],
+    //   body: [
+    //     ".editor-box p",
+    //     ".content-editor p",
+    //     ".news-detail-section p",
+    //     ".detail-box p",
+    //     "article p",
+    //     ".content p",
+    //     ".article-content p",
+    //     ".story-content p",
+    //     ".news-content p",
+    //   ],
+    //   image: [
+    //     "meta[property='og:image']",
+    //     "article img",
+    //     ".content img",
+    //     ".news-image img",
+    //   ],
+    // },
     "ratopati.com": {
       title: ["h1", ".detail-title", ".headline"],
       description: ["meta[name='description']", ".summary", ".lead"],
@@ -468,6 +474,7 @@ function isJunkParagraph(text: string): boolean {
   return junkPatterns.some((pattern) => pattern.test(trimmed));
 }
 
+
 function extractPageData(
   html: string,
   fallback: { title: string; snippet: string; source: string; link: string },
@@ -570,7 +577,6 @@ function extractPageData(
     ];
 
     for (const selector of sourceSelectors) {
-      if (extracted.length >= 8) break;
       const nodes = $(selector).toArray();
       for (const node of nodes) {
         const text = cleanText($(node).text());
@@ -578,9 +584,7 @@ function extractPageData(
         if (isJunkParagraph(text)) continue;
         if (extracted.some((item) => item === text)) continue;
         extracted.push(text);
-        if (extracted.length >= 8) break;
       }
-      if (extracted.length >= 4 && selector !== "main p") break;
     }
 
     return extracted.filter(
@@ -1107,8 +1111,7 @@ export async function runNewsFetch() {
         pageData.excerpt || entry.snippet || "Fresh reporting from Nepal.";
       const rawBodyParagraphs = pageData.body
         .map((p) => cleanText(p))
-        .filter((p) => p.length > 20 && !isJunkParagraph(p))
-        .slice(0, 6);
+        .filter((p) => p.length > 20 && !isJunkParagraph(p));
 
       const sourceIsNepali =
         hasDevanagari(rawTitle) ||

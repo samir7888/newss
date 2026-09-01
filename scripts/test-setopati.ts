@@ -40,6 +40,7 @@ async function runTest() {
 
     const html = await res.text();
     const $ = load(html);
+    console.log(html,$)
 
     const title = $("h1").first().text().trim() || $(".news-big-title").first().text().trim() || rawTitle;
     const subHeading = $(".news-sub-heading").first().text().trim();
@@ -55,15 +56,15 @@ async function runTest() {
     });
 
     const category = inferCategorySlugFromText(title, `${excerpt} ${paragraphs.join(" ")}`, "politics");
-    const bodyNeHtml = toRichHtml(normalizeNepaliText(paragraphs.slice(0, 8).join("\n\n")), "ne");
+    const bodyNeHtml = toRichHtml(normalizeNepaliText(paragraphs.join("\n\n")), "ne");
 
     stories.push({
       title,
-      excerpt: excerpt.slice(0, 200),
+      excerpt: excerpt,
       category,
       ogImage,
       paragraphsCount: paragraphs.length,
-      bodyHtmlSnippet: bodyNeHtml.slice(0, 150),
+      bodyHtmlSnippet: bodyNeHtml,
       hash: contentHash(title),
     });
   }
