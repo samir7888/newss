@@ -40,10 +40,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: [
-      `${siteUrl.replace(/\/$/, "")}/sitemap.xml`,
-      "https://sameerbasnet.com/api/sitemap.xml",
-      "https://sameerbasnet.com/sitemap.xml",
-    ],
+    sitemap: `${siteUrl.replace(/\/$/, "")}/sitemap.xml`,
   };
 }
