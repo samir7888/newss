@@ -190,6 +190,7 @@ export default async function ArticlePage({
                   ? "यो समाचार साझा गर्नुहोस्"
                   : "Share this story"
               }
+              url={`/${resolvedLocale}/article/${currentSlug}`}
             />
           </div>
 

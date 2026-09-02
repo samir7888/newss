@@ -6,11 +6,11 @@ import { Check, Copy, Share2, MessageCircle } from "lucide-react";
 interface ShareButtonsProps {
   title: string;
   label: string;
+  url: string;
 }
 
-export function ShareButtons({ title, label }: ShareButtonsProps) {
+export function ShareButtons({ title, label, url }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
-  const url = typeof window === "undefined" ? "" : window.location.href;
 
   async function copyLink() {
     try {

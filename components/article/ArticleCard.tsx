@@ -149,7 +149,10 @@ export function ArticleCard({
       </div>
 
       {/* Image Thumbnail (Fixed Aspect Ratio 4:3 or 16:9) */}
-      <div className="relative h-20 w-28 sm:h-28 sm:w-44 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200/80">
+      <Link
+        href={articleHref}
+        className="relative h-20 w-28 sm:h-28 sm:w-44 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200/80 block"
+      >
         <Image
           src={article.image}
           alt={article.imageAlt[locale] || title}
@@ -157,7 +160,7 @@ export function ArticleCard({
           sizes="(max-width: 640px) 112px, 176px"
           className="object-cover transition duration-300 group-hover:scale-105"
         />
-      </div>
+      </Link>
     </article>
   );
 }

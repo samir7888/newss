@@ -1078,7 +1078,7 @@ export async function runNewsFetch() {
     }
   }
 
-  const selectedCandidates = unique.slice(0, 6);
+  const selectedCandidates = unique.slice(0, 8);
   const processedPayload: Array<any> = [];
 
   for (const entry of selectedCandidates) {
