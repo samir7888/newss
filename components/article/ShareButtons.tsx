@@ -12,10 +12,15 @@ interface ShareButtonsProps {
 export function ShareButtons({ title, label, url }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
 
+  const absoluteUrl =
+    typeof window !== "undefined"
+      ? new URL(url, window.location.origin).href
+      : url;
+
   async function copyLink() {
     try {
       if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(absoluteUrl);
         setCopied(true);
         window.setTimeout(() => setCopied(false), 2000);
       }
@@ -24,7 +29,7 @@ export function ShareButtons({ title, label, url }: ShareButtonsProps) {
     }
   }
 
-  const encodedUrl = encodeURIComponent(url);
+  const encodedUrl = encodeURIComponent(absoluteUrl);
   const encodedTitle = encodeURIComponent(title);
 
   return (
@@ -74,11 +79,10 @@ export function ShareButtons({ title, label, url }: ShareButtonsProps) {
           type="button"
           onClick={copyLink}
           aria-label={copied ? "Link copied" : "Copy link"}
-          className={`inline-flex h-10 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition active:scale-95 shadow-2xs ${
-            copied
+          className={`inline-flex h-10 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition active:scale-95 shadow-2xs ${copied
               ? "border-emerald-600 bg-emerald-600 text-white"
               : "border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-          }`}
+            }`}
         >
           {copied ? (
             <>

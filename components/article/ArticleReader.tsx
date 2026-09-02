@@ -13,6 +13,7 @@ interface ArticleReaderProps {
   source: string;
   readTime: string;
   bodyHtml: string;
+  bodyText: string;
   locale: Locale;
 }
 
@@ -25,6 +26,7 @@ export function ArticleReader({
   source,
   readTime,
   bodyHtml,
+  bodyText,
   locale,
 }: ArticleReaderProps) {
   const [fontSize, setFontSize] = useState<"normal" | "large" | "xlarge">("normal");
@@ -46,6 +48,7 @@ export function ArticleReader({
         publishedAt={publishedAt}
         source={source}
         readTime={readTime}
+        bodyText={bodyText}
         locale={locale}
         onFontSizeChange={(size) => setFontSize(size)}
       />

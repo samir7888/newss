@@ -8,6 +8,7 @@ import { ArticleCard } from "@/components/article/ArticleCard";
 import { ArticleReader } from "@/components/article/ArticleReader";
 import { ReadingProgress } from "@/components/article/ReadingProgress";
 import { ShareButtons } from "@/components/article/ShareButtons";
+import { LikeButton } from "@/components/article/LikeButton";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
@@ -175,8 +176,18 @@ export default async function ArticlePage({
             source={article.source}
             readTime={readTime}
             bodyHtml={bodyHtml}
+            bodyText={rawBodyText}
             locale={resolvedLocale}
           />
+
+          {/* LIKE BUTTON (below body content) */}
+          <div className="flex items-center justify-center py-2 no-print">
+            <LikeButton
+              slug={currentSlug}
+              locale={resolvedLocale}
+              initialLikes={article.likesCount}
+            />
+          </div>
 
           {/* §5: IN-ARTICLE AD UNIT (Clearly boxed & labelled) */}
           <AdSlot variant="in-article" locale={resolvedLocale} className="no-print" />

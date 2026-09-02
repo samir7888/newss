@@ -107,6 +107,48 @@ const defaultFeeds = [
     url: process.env.FEED_URL_13 || "https://www.kathmandutribune.com/feed/",
     category: "culture",
   },
+
+  // === ADDITIONAL SOURCES (expanded coverage) ===
+  {
+    name: "Setopati",
+    url: process.env.FEED_URL_14 || "https://www.setopati.com/feed",
+    category: "politics",
+  },
+  {
+    name: "Annapurna Post",
+    url: process.env.FEED_URL_15 || "https://annapurnapost.com/feed/",
+    category: "politics",
+  },
+  {
+    name: "Kantipur",
+    url: process.env.FEED_URL_16 || "https://www.kantipurdaily.com/rss",
+    category: "politics",
+  },
+  {
+    name: "Karobar Daily",
+    url: process.env.FEED_URL_17 || "https://www.karobardaily.com/feed",
+    category: "economy",
+  },
+  {
+    name: "Sharesansar",
+    url: process.env.FEED_URL_18 || "https://www.sharesansar.com/feed",
+    category: "economy",
+  },
+  {
+    name: "Bizmandu",
+    url: process.env.FEED_URL_19 || "https://bizmandu.com/rss",
+    category: "economy",
+  },
+  {
+    name: "Ekanthipur",
+    url: process.env.FEED_URL_20 || "https://ekantipur.com/feed",
+    category: "politics",
+  },
+  {
+    name: "Sports Jana Aastha",
+    url: process.env.FEED_URL_21 || "https://www.sportsjanaasthaepaper.com/feed/",
+    category: "sports",
+  },
 ];
 
 const cacheDir = path.join(process.cwd(), ".news-cache");
@@ -293,32 +335,32 @@ function getSourceSelectors(url: string) {
     },
 
     // Setopati has no proper html structure to extract the data
-    // "setopati.com": {
-    //   title: ["h1", ".news-big-title", ".news-title", ".headline"],
-    //   description: [
-    //     "meta[name='description']",
-    //     ".news-sub-heading",
-    //     ".summary",
-    //     ".lead",
-    //   ],
-    //   body: [
-    //     ".editor-box p",
-    //     ".content-editor p",
-    //     ".news-detail-section p",
-    //     ".detail-box p",
-    //     "article p",
-    //     ".content p",
-    //     ".article-content p",
-    //     ".story-content p",
-    //     ".news-content p",
-    //   ],
-    //   image: [
-    //     "meta[property='og:image']",
-    //     "article img",
-    //     ".content img",
-    //     ".news-image img",
-    //   ],
-    // },
+    "setopati.com": {
+      title: ["h1", ".news-big-title", ".news-title", ".headline"],
+      description: [
+        "meta[name='description']",
+        ".news-sub-heading",
+        ".summary",
+        ".lead",
+      ],
+      body: [
+        ".editor-box p",
+        ".content-editor p",
+        ".news-detail-section p",
+        ".detail-box p",
+        "article p",
+        ".content p",
+        ".article-content p",
+        ".story-content p",
+        ".news-content p",
+      ],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".content img",
+        ".news-image img",
+      ],
+    },
     "ratopati.com": {
       title: ["h1", ".detail-title", ".headline"],
       description: ["meta[name='description']", ".summary", ".lead"],
@@ -401,6 +443,50 @@ function getSourceSelectors(url: string) {
       title: ["h1", ".post-title"],
       description: ["meta[name='description']", ".lead"],
       body: ["article p", ".entry-content p", ".content p", ".post-content p"],
+      image: ["meta[property='og:image']", "article img"],
+    },
+    "ekantipur.com": {
+      title: ["h1", ".article-title", ".news-title"],
+      description: ["meta[name='description']", ".lead", ".summary"],
+      body: ["article p", ".content p", ".article-content p", ".post-content p"],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".article-image img",
+      ],
+    },
+    "kantipurdaily.com": {
+      title: ["h1", ".article-title", ".news-title"],
+      description: ["meta[name='description']", ".lead", ".summary"],
+      body: ["article p", ".content p", ".article-content p", ".post-content p"],
+      image: ["meta[property='og:image']", "article img"],
+    },
+    "annapurnapost.com": {
+      title: ["h1", ".article-title", ".post-title"],
+      description: ["meta[name='description']", ".lead", ".summary"],
+      body: ["article p", ".article-content p", ".entry-content p", ".content p"],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".featured-image img",
+      ],
+    },
+    "karobardaily.com": {
+      title: ["h1", ".entry-title", ".post-title"],
+      description: ["meta[name='description']", ".lead", ".summary"],
+      body: ["article p", ".entry-content p", ".post-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img"],
+    },
+    "sharesansar.com": {
+      title: ["h1", ".entry-title", ".post-title"],
+      description: ["meta[name='description']", ".lead", ".summary"],
+      body: ["article p", ".entry-content p", ".post-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img"],
+    },
+    "bizmandu.com": {
+      title: ["h1", ".entry-title", ".post-title"],
+      description: ["meta[name='description']", ".lead", ".summary"],
+      body: ["article p", ".entry-content p", ".post-content p", ".content p"],
       image: ["meta[property='og:image']", "article img"],
     },
   };

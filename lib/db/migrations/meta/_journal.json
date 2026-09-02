@@ -8,6 +8,13 @@
       "when": 1788237123330,
       "tag": "0000_quick_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788371437443,
+      "tag": "0001_add_likes_count",
+      "breakpoints": true
     }
   ]
 }

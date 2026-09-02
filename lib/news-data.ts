@@ -19,6 +19,7 @@ export type NewsArticle = {
   publishedAt: string;
   source: string;
   sourceUrl: string;
+  likesCount: number;
 };
 
 function toParagraphs(value: string | null | undefined) {
@@ -46,6 +47,7 @@ function toArticleRecord(row: {
   sourceHeadline: string;
   sourceUrl: string;
   categorySlug: string | null;
+  likesCount: number | null;
 }): NewsArticle {
   return {
     id: row.id,
@@ -83,6 +85,7 @@ function toArticleRecord(row: {
       : new Date().toISOString(),
     source: row.sourceHeadline || "Nepal News Pulse",
     sourceUrl: row.sourceUrl || "https://www.nepalnews.com",
+    likesCount: row.likesCount ?? 0,
   };
 }
 
@@ -102,6 +105,7 @@ const articleFields = {
   sourceHeadline: articles.sourceHeadline,
   sourceUrl: articles.sourceUrl,
   categorySlug: categories.slug,
+  likesCount: articles.likesCount,
 };
 
 async function withFallback<T>(
