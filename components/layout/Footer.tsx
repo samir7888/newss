@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { categories, type Locale } from "@/lib/site";
 import { Globe, ShieldCheck } from "lucide-react";
 
@@ -12,9 +13,13 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
           {/* Brand Col */}
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-700 text-white font-extrabold text-lg">
-                ता
-              </div>
+              <Image
+                src="/logo.png"
+                alt={locale === "ne" ? "ताजा समाचार" : "Nepal News Pulse"}
+                width={197}
+                height={148}
+                className="h-10 w-auto"
+              />
               <span className="text-xl font-bold tracking-tight text-white">
                 {locale === "ne" ? "ताजा समाचार" : "Nepal News Pulse"}
               </span>

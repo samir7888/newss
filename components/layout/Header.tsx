@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Globe, Menu, Search, X, TrendingUp, Bookmark } from "lucide-react";
 import { categories, type Locale } from "@/lib/site";
@@ -99,17 +100,14 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
               className="group flex items-center gap-2.5 py-1"
               aria-label="Homepage"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-700 text-white font-extrabold text-lg shadow-xs transition group-hover:bg-red-800">
-                <span>ता</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-base sm:text-lg font-bold leading-tight tracking-tight text-slate-950 group-hover:text-red-700 transition">
-                  {locale === "ne" ? "ताजा समाचार" : "Nepal News"}
-                </span>
-                <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">
-                  {locale === "ne" ? "डिजिटल पत्रिका" : "News Pulse"}
-                </span>
-              </div>
+              <Image
+                src="/logo.png"
+                alt={locale === "ne" ? "ताजा समाचार" : "Nepal News"}
+                width={197}
+                height={148}
+                priority
+                className="h-9 w-auto"
+              />
             </Link>
           </div>
 
@@ -217,9 +215,13 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
           <div className="relative flex w-4/5 max-w-sm flex-col bg-white p-6 shadow-2xl overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-700 text-white font-bold text-base">
-                  ता
-                </div>
+                <Image
+                  src="/logo.png"
+                  alt={locale === "ne" ? "ताजा समाचार" : "Nepal News"}
+                  width={197}
+                  height={148}
+                  className="h-8 w-auto"
+                />
                 <span className="font-bold text-slate-900 text-base">
                   {locale === "ne" ? "ताजा समाचार" : "Nepal News"}
                 </span>

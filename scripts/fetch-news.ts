@@ -844,7 +844,6 @@ export async function translateParagraphList(
   const validParagraphs = paragraphs
     .map((p) => cleanText(p))
     .filter((p) => p.length > 0 && !isInvalidTranslationText(p))
-    .slice(0, 5);
 
   if (validParagraphs.length === 0) return [];
 
