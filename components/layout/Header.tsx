@@ -20,7 +20,9 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
   const pathname = usePathname() || "";
   const todayText = getTodayFormatted(locale);
 
-  const switchHref = alternateHref || (locale === "ne" ? "/en" : "/ne");
+  const switchHref = alternateHref || (locale === "ne" ? "/en" : "/");
+  const homeHref = locale === "ne" ? "/" : "/en";
+  const isHomeActive = pathname === "/" || pathname === `/${locale}`;
 
   return (
     <>
@@ -96,7 +98,7 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
             </button>
 
             <Link
-              href={`/${locale}`}
+              href={homeHref}
               className="group flex items-center gap-2.5 py-1"
               aria-label="Homepage"
             >
@@ -173,9 +175,9 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
         {/* Mobile Horizontal Category Rail (Scrollable) */}
         <div className="md:hidden border-t border-slate-100 bg-white px-3 py-2 overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-2">
           <Link
-            href={`/${locale}`}
+            href={homeHref}
             className={`shrink-0 px-3 py-1 text-xs rounded-full transition font-medium ${
-              pathname === `/${locale}`
+              isHomeActive
                 ? "bg-red-700 text-white font-semibold shadow-xs"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}
@@ -261,10 +263,10 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
               </p>
               <nav className="flex flex-col space-y-1">
                 <Link
-                  href={`/${locale}`}
+                  href={homeHref}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium ${
-                    pathname === `/${locale}`
+                    isHomeActive
                       ? "bg-red-50 text-red-800 font-semibold"
                       : "text-slate-700 hover:bg-slate-50"
                   }`}

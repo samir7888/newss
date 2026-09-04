@@ -49,10 +49,11 @@ export const metadata: Metadata = {
     "today news Nepal",
   ],
   alternates: {
-    canonical: "/ne",
+    canonical: "/",
     languages: {
-      ne: "/ne",
+      ne: "/",
       en: "/en",
+      "x-default": "/",
     },
   },
   openGraph: {

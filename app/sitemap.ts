@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await getLatestArticles(200);
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${origin}/ne`, changeFrequency: "hourly" as const, priority: 1.0 },
+    { url: `${origin}`, changeFrequency: "hourly" as const, priority: 1.0 },
     { url: `${origin}/en`, changeFrequency: "hourly" as const, priority: 1.0 },
     { url: `${origin}/ne/search`, changeFrequency: "daily" as const, priority: 0.7 },
     { url: `${origin}/en/search`, changeFrequency: "daily" as const, priority: 0.7 },

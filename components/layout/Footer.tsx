@@ -82,7 +82,7 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
                 {locale === "ne" ? "नियम तथा सर्तहरू (Terms & Conditions)" : "Terms & Conditions"}
               </Link>
               <Link
-                href={locale === "ne" ? "/en" : "/ne"}
+                href={locale === "ne" ? "/en" : "/"}
                 className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition pt-1 text-xs"
               >
                 <Globe className="h-3.5 w-3.5" />

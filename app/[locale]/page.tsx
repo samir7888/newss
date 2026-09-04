@@ -11,12 +11,34 @@ import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { getCategories, getLatestArticles } from "@/lib/news-data";
 import { formatRelativeTime } from "@/lib/format-date";
 import { getCategoryTheme } from "@/lib/category-theme";
+import type { Metadata } from "next";
 import type { Locale } from "@/lib/site";
 
 export const revalidate = 60; // Revalidate every 1 minute (60s)
 
 export function generateStaticParams() {
   return [{ locale: "ne" }, { locale: "en" }];
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const resolvedLocale: Locale = locale === "en" ? "en" : "ne";
+  const canonicalPath = resolvedLocale === "ne" ? "/" : "/en";
+
+  return {
+    alternates: {
+      canonical: canonicalPath,
+      languages: {
+        ne: "/",
+        en: "/en",
+        "x-default": "/",
+      },
+    },
+  };
 }
 
 export default async function LocaleHomePage({
