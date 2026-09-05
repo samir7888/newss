@@ -15,13 +15,13 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
             <div className="flex items-center gap-2.5">
               <Image
                 src="/logo.png"
-                alt={locale === "ne" ? "ताजा समाचार" : "Nepal News Pulse"}
+                alt={locale === "ne" ? "ताजा समाचार" : "TaajaSamachar"}
                 width={197}
                 height={148}
                 className="h-10 w-auto"
               />
               <span className="text-xl font-bold tracking-tight text-white">
-                {locale === "ne" ? "ताजा समाचार" : "Nepal News Pulse"}
+                {locale === "ne" ? "ताजा समाचार" : "TaajaSamachar"}
               </span>
             </div>
             <p className="mt-3 text-sm text-slate-400 leading-relaxed max-w-md">
@@ -33,8 +33,8 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
               <span>
                 {locale === "ne"
-                  ? "तथ्यपरक र स्रोत खुलाइएको समाचार संकलन"
-                  : "Verified journalism aggregation & sourcing"}
+                  ? "मौलिक, खोजमूलक तथा तथ्यपरक डिजिटल पत्रकारिता"
+                  : "Original, Independent & Fact-Checked Journalism"}
               </span>
             </div>
           </div>
@@ -70,6 +70,18 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
             </h3>
             <div className="flex flex-col space-y-2 text-sm">
               <Link
+                href={`/${locale}/about`}
+                className="text-slate-300 hover:text-white transition"
+              >
+                {locale === "ne" ? "हाम्रो बारेमा (About Us)" : "About Us"}
+              </Link>
+              <Link
+                href={`/${locale}/contact`}
+                className="text-slate-300 hover:text-white transition"
+              >
+                {locale === "ne" ? "सम्पर्क (Contact Us)" : "Contact Us"}
+              </Link>
+              <Link
                 href={`/${locale}/privacy-policy`}
                 className="text-slate-300 hover:text-white transition"
               >
@@ -95,7 +107,7 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
         {/* Bottom Bar */}
         <div className="mt-10 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>
-            © {currentYear} {locale === "ne" ? "ताजा समाचार" : "Nepal News Pulse"}.{" "}
+            © {currentYear} {locale === "ne" ? "ताजा समाचार" : "TaajaSamachar"}.{" "}
             {locale === "ne" ? "सर्वाधिकार सुरक्षित।" : "All rights reserved."}
           </p>
           <div className="flex items-center gap-4">

@@ -93,7 +93,9 @@ export function ArticleCard({
             {excerpt}
           </p>
           <div className="mt-auto pt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100">
-            <span>{article.source}</span>
+            <span className="font-medium text-slate-500">
+              {locale === "ne" ? "सम्पादकीय" : "Editorial Desk"}
+            </span>
           </div>
         </div>
       </article>
@@ -106,7 +108,7 @@ export function ArticleCard({
       {/* Content Side */}
       <div className="flex flex-1 flex-col justify-between min-w-0">
         <div>
-          {/* Metadata Row: Category Pill + Relative Time + Source */}
+          {/* Metadata Row: Category Pill + Relative Time + Editorial */}
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span
               className={`inline-block px-2 py-0.5 text-[11px] font-semibold rounded-md border ${theme.bg} ${theme.text} ${theme.border}`}
@@ -118,14 +120,10 @@ export function ArticleCard({
               <Clock className="h-3 w-3 text-slate-400" />
               {timeAgo}
             </span>
-            {article.source && (
-              <>
-                <span className="hidden sm:inline text-slate-300">•</span>
-                <span className="hidden sm:inline text-xs text-slate-500">
-                  {article.source}
-                </span>
-              </>
-            )}
+            <span className="hidden sm:inline text-slate-300">•</span>
+            <span className="hidden sm:inline text-xs text-slate-500 font-medium">
+              {locale === "ne" ? "सम्पादकीय" : "Editorial Desk"}
+            </span>
           </div>
 
           {/* Headline (Main Click Target >= 44px height) */}
@@ -142,9 +140,9 @@ export function ArticleCard({
           </p>
         </div>
 
-        {/* Mobile Source attribution */}
+        {/* Mobile Editorial attribution */}
         <div className="mt-2 flex sm:hidden items-center text-[11px] text-slate-400">
-          <span>{article.source}</span>
+          <span>{locale === "ne" ? "सम्पादकीय" : "Editorial Desk"}</span>
         </div>
       </div>
 

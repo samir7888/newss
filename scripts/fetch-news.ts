@@ -43,7 +43,7 @@ const defaultFeeds = [
     category: "economy",
   },
 
- // as this has no proper html structure
+  // as this has no proper html structure
   // {
   //   name: "Setopati",
   //   url: process.env.FEED_URL_2 || "https://www.setopati.com/feed",
@@ -108,12 +108,7 @@ const defaultFeeds = [
     category: "culture",
   },
 
-  // === ADDITIONAL SOURCES (expanded coverage) ===
-  {
-    name: "Setopati",
-    url: process.env.FEED_URL_14 || "https://www.setopati.com/feed",
-    category: "politics",
-  },
+
   {
     name: "Annapurna Post",
     url: process.env.FEED_URL_15 || "https://annapurnapost.com/feed/",
@@ -625,7 +620,7 @@ function extractPageData(
       : Array.isArray(structuredData?.image)
         ? structuredData.image[0]
         : typeof structuredData?.image === "object" &&
-            structuredData.image !== null
+          structuredData.image !== null
           ? ((structuredData.image as Record<string, unknown>).url ??
             (structuredData.image as Record<string, unknown>).contentUrl ??
             "")
@@ -693,24 +688,24 @@ function extractPageData(
 
   const title = cleanText(
     structuredHeadline ||
-      titleFromSelectors ||
-      $('meta[property="og:title"]').attr("content") ||
-      $('meta[name="twitter:title"]').attr("content") ||
-      $('meta[name="title"]').attr("content") ||
-      candidateRoot.find("h1").first().text() ||
-      $("h1").first().text() ||
-      fallback.title,
+    titleFromSelectors ||
+    $('meta[property="og:title"]').attr("content") ||
+    $('meta[name="twitter:title"]').attr("content") ||
+    $('meta[name="title"]').attr("content") ||
+    candidateRoot.find("h1").first().text() ||
+    $("h1").first().text() ||
+    fallback.title,
   );
 
   const excerpt = cleanText(
     structuredDescription ||
-      descriptionFromSelectors ||
-      $('meta[name="description"]').attr("content") ||
-      $('meta[property="og:description"]').attr("content") ||
-      paragraphs[0] ||
-      candidateRoot.find("p").first().text() ||
-      $("p").first().text() ||
-      fallback.snippet,
+    descriptionFromSelectors ||
+    $('meta[name="description"]').attr("content") ||
+    $('meta[property="og:description"]').attr("content") ||
+    paragraphs[0] ||
+    candidateRoot.find("p").first().text() ||
+    $("p").first().text() ||
+    fallback.snippet,
   ).slice(0, 260);
 
   const imageUrlFromSelectors = siteRules.image
@@ -720,9 +715,9 @@ function extractPageData(
       return [
         resolveImageUrl(
           node.attr("src") ||
-            node.attr("content") ||
-            node.attr("data-src") ||
-            "",
+          node.attr("content") ||
+          node.attr("data-src") ||
+          "",
           fallback.link,
         ),
       ];
@@ -744,17 +739,17 @@ function extractPageData(
     typeof structuredData?.datePublished === "string"
       ? structuredData.datePublished
       : $('meta[property="article:published_time"]').attr("content") ||
-        $('meta[name="pubdate"]').attr("content") ||
-        $("time").first().attr("datetime") ||
-        new Date().toISOString();
+      $('meta[name="pubdate"]').attr("content") ||
+      $("time").first().attr("datetime") ||
+      new Date().toISOString();
 
   const body =
     paragraphs.length > 0
       ? paragraphs
       : [
-          excerpt || fallback.snippet,
-          `This story was originally published by ${fallback.source}. The source link is included below for direct review and additional context.`,
-        ];
+        excerpt || fallback.snippet,
+        `This story was originally published by ${fallback.source}. The source link is included below for direct review and additional context.`,
+      ];
 
   return {
     title,
@@ -892,9 +887,9 @@ export async function translateSingle(
       });
       const fbResult = fbResponse.ok
         ? ((await fbResponse.json()) as {
-            responseData?: { translatedText?: string };
-            responseStatus?: number;
-          })
+          responseData?: { translatedText?: string };
+          responseStatus?: number;
+        })
         : null;
       clearTimeout(timeoutId);
 
@@ -1081,7 +1076,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
       payload.map(async (item) => {
         const record = item as Record<string, unknown>;
         const categorySlug = String(record.category ?? "politics");
-        const sourceName = String(record.sourceName ?? "Nepal News Pulse");
+        const sourceName = String(record.sourceName ?? "TaajaSamachar");
         const sourceUrl = String(
           record.sourceUrl ?? "https://www.nepalnews.com",
         );
@@ -1178,18 +1173,18 @@ export async function runNewsFetch() {
       const fetched = await fetchHtml(entry.link, 5000);
       const pageData = fetched
         ? extractPageData(fetched, {
-            title: fallbackTitle,
-            snippet: entry.snippet,
-            source: entry.source,
-            link: entry.link,
-          })
+          title: fallbackTitle,
+          snippet: entry.snippet,
+          source: entry.source,
+          link: entry.link,
+        })
         : {
-            title: fallbackTitle,
-            excerpt: entry.snippet,
-            body: [entry.snippet],
-            imageUrl: buildUnsplashImageUrl(entry.category),
-            publishedAt: new Date().toISOString(),
-          };
+          title: fallbackTitle,
+          excerpt: entry.snippet,
+          body: [entry.snippet],
+          imageUrl: buildUnsplashImageUrl(entry.category),
+          publishedAt: new Date().toISOString(),
+        };
 
       const rawTitle = pageData.title || fallbackTitle;
       const rawExcerpt =

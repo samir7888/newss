@@ -59,8 +59,8 @@ export const articles: Article[] = [
       en: "Railway line and station image",
     },
     publishedAt: "2026-08-25T08:15:00.000Z",
-    source: "Setopati",
-    sourceUrl: "https://www.setopati.com/",
+    source: "TaajaSamachar",
+    sourceUrl: "/",
   },
   {
     slug: "tourism-revival-boosts-mountain-regions",
@@ -94,8 +94,8 @@ export const articles: Article[] = [
       en: "Mountain landscape with visitors",
     },
     publishedAt: "2026-08-27T10:05:00.000Z",
-    source: "Barakhari",
-    sourceUrl: "https://www.barakhari.com/",
+    source: "TaajaSamachar",
+    sourceUrl: "/",
   },
   {
     slug: "startup-funding-picks-up-in-kathmandu",
@@ -129,8 +129,8 @@ export const articles: Article[] = [
       en: "Startup team and computer workspace",
     },
     publishedAt: "2026-08-29T12:00:00.000Z",
-    source: "Techpana",
-    sourceUrl: "https://techpana.com/",
+    source: "TaajaSamachar",
+    sourceUrl: "/",
   },
   {
     slug: "nepal-education-reform-focuses-on-digital-learning",
@@ -164,8 +164,8 @@ export const articles: Article[] = [
       en: "Classroom and digital learning image",
     },
     publishedAt: "2026-08-30T09:15:00.000Z",
-    source: "Online Khabar",
-    sourceUrl: "https://www.onlinekhabar.com/",
+    source: "TaajaSamachar",
+    sourceUrl: "/",
   },
   {
     slug: "nepal-sports-committee-aims-for-better-facilities",
@@ -199,8 +199,8 @@ export const articles: Article[] = [
       en: "Sports field and athlete training image",
     },
     publishedAt: "2026-08-31T07:20:00.000Z",
-    source: "Ratopati",
-    sourceUrl: "https://ratopati.com/",
+    source: "TaajaSamachar",
+    sourceUrl: "/",
   },
 ];
 

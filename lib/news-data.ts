@@ -83,8 +83,8 @@ function toArticleRecord(row: {
     publishedAt: row.publishedAt
       ? new Date(row.publishedAt).toISOString()
       : new Date().toISOString(),
-    source: row.sourceHeadline || "Nepal News Pulse",
-    sourceUrl: row.sourceUrl || "https://www.nepalnews.com",
+    source: "TaajaSamachar",
+    sourceUrl: "/",
     likesCount: row.likesCount ?? 0,
   };
 }
@@ -169,17 +169,17 @@ export async function getArticleBySlug(locale: "ne" | "en", slug: string) {
     const rows =
       locale === "ne"
         ? await db
-            .select(articleFields)
-            .from(articles)
-            .leftJoin(categories, eq(articles.categoryId, categories.id))
-            .where(eq(articles.slugNe, slug))
-            .limit(1)
+          .select(articleFields)
+          .from(articles)
+          .leftJoin(categories, eq(articles.categoryId, categories.id))
+          .where(eq(articles.slugNe, slug))
+          .limit(1)
         : await db
-            .select(articleFields)
-            .from(articles)
-            .leftJoin(categories, eq(articles.categoryId, categories.id))
-            .where(eq(articles.slugEn, slug))
-            .limit(1);
+          .select(articleFields)
+          .from(articles)
+          .leftJoin(categories, eq(articles.categoryId, categories.id))
+          .where(eq(articles.slugEn, slug))
+          .limit(1);
 
     return rows[0] ? toArticleRecord(rows[0] as any) : null;
   }, null);

@@ -124,7 +124,7 @@ export default function SavedArticlesPage({
                     </div>
                     <div className="min-w-0">
                       <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                        {item.category} · {item.source}
+                        {item.category} · {resolvedLocale === "ne" ? "सम्पादकीय" : "Editorial Desk"}
                       </span>
                       <h2 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-red-700 transition truncate">
                         <Link href={`/${resolvedLocale}/article/${item.slug}`}>

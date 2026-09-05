@@ -75,6 +75,15 @@ const privacyContent = {
                 ],
             },
             {
+                heading: "Advertising and Google AdSense",
+                body: [
+                    "This website uses Google AdSense, a web advertising service provided by Google LLC. Google AdSense uses cookies and similar tracking technologies to serve personalised advertisements based on your prior visits to this website and other websites on the internet.",
+                    "Google's use of advertising cookies enables it and its partners to serve ads to you based on your visit to our website and/or other websites on the internet. You may opt out of personalised advertising by visiting Google's Ad Settings page at https://adssettings.google.com.",
+                    "Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits. The use of advertising cookies by Google is subject to Google's Privacy Policy at https://policies.google.com/privacy and the DoubleClick cookie policy at https://policies.google.com/technologies/ads.",
+                    "We do not have access to or control over cookies that are used by third-party advertisers. You may disable cookies through your browser settings, which will opt you out of personalised advertising.",
+                ],
+            },
+            {
                 heading: "Contact",
                 body: [
                     "If you have questions about this policy or how we handle your data, please contact us using the contact information displayed on the website.",
@@ -147,6 +156,15 @@ const privacyContent = {
                 body: [
                     "हामीले प्राविधिकी, कानूनी आवश्यकताहरू, वा सेवा सञ्चालनमा परिवर्तन हुँदा यो गोपनीयता नीति अपडेट गर्न सक्छौं।",
                     "महत्वपूर्ण परिवर्तन हुँदा हामी पृष्ठको शीर्षमा रहेको मिति अपडेट गर्छौं र वेबसाइटमा सूचना पोस्ट गर्न सक्दछौं।",
+                ],
+            },
+            {
+                heading: "विज्ञापन र Google AdSense",
+                body: [
+                    "यो वेबसाइट Google LLC द्वारा प्रदान गरिएको वेब विज्ञापन सेवा Google AdSense प्रयोग गर्दछ। Google AdSense ले यो वेबसाइट र इन्टरनेटका अन्य वेबसाइटमा तपाईंको अघिल्लो भ्रमणका आधारमा व्यक्तिगत विज्ञापनहरू प्रस्तुत गर्न कुकी र समान ट्र्याकिङ प्रविधिहरू प्रयोग गर्दछ।",
+                    "Google को विज्ञापन कुकी प्रयोगले यसलाई र यसका साझेदारहरूलाई हाम्रो वेबसाइट र/वा इन्टरनेटका अन्य वेबसाइटमा तपाईंको भ्रमणका आधारमा विज्ञापन देखाउन सक्षम बनाउँछ। तपाईं Google को Ad Settings पृष्ठ https://adssettings.google.com मा गएर व्यक्तिगत विज्ञापनबाट अप्ट-आउट गर्न सक्नुहुन्छ।",
+                    "Google सहित तेस्रो-पक्ष विक्रेताहरूले प्रयोगकर्ताको अघिल्लो भ्रमणका आधारमा विज्ञापन दिन कुकी प्रयोग गर्दछन्। Google द्वारा विज्ञापन कुकी प्रयोग Google को गोपनीयता नीति https://policies.google.com/privacy र DoubleClick कुकी नीति https://policies.google.com/technologies/ads अनुसार हुन्छ।",
+                    "हामीसँग तेस्रो-पक्ष विज्ञापनदाताहरूले प्रयोग गर्ने कुकीहरूमा पहुँच वा नियन्त्रण छैन। तपाईं ब्राउजर सेटिङमार्फत कुकी निष्क्रिय गरेर व्यक्तिगत विज्ञापनबाट अप्ट-आउट गर्न सक्नुहुन्छ।",
                 ],
             },
             {

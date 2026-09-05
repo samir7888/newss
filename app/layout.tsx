@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +28,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ताजा समाचार | Taaja Samachar | Nepal News Pulse",
+    default: "ताजा समाचार | Taaja Samachar | TaajaSamachar",
     template: "%s | ताजा समाचार",
   },
   description:
@@ -81,6 +82,8 @@ export const metadata: Metadata = {
   },
 };
 
+const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -92,6 +95,16 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} h-full antialiased`}
     >
+      <head>
+        {adsenseId && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
+      </head>
       <body className="min-h-full bg-[#FAFAF8] text-slate-900 font-sans">
         {children}
         <Analytics />

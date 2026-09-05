@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock, ExternalLink, Globe, ShieldCheck, ChevronRight } from "lucide-react";
+import { Clock, ShieldCheck, ChevronRight } from "lucide-react";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { ArticleCard } from "@/components/article/ArticleCard";
 import { ArticleReader } from "@/components/article/ArticleReader";
@@ -132,7 +132,7 @@ export default async function ArticlePage({
               </span>
             </div>
 
-           
+
           </div>
 
           {/* §2: LARGE HEADLINE (Owns the top of page) */}
@@ -145,7 +145,7 @@ export default async function ArticlePage({
             {article.excerpt[resolvedLocale]}
           </p>
 
-        
+
 
           {/* ============================================================= */}
           {/* §6: HERO IMAGE WITH VISIBLE CAPTION + PHOTO CREDIT */}
@@ -161,7 +161,7 @@ export default async function ArticlePage({
                 className="object-cover"
               />
             </div>
-            
+
           </figure>
 
           {/* ============================================================= */}
@@ -173,7 +173,7 @@ export default async function ArticlePage({
             category={categoryName}
             image={article.image}
             publishedAt={article.publishedAt}
-            source={article.source}
+            source={resolvedLocale === "ne" ? "सम्पादकीय टोली" : "Editorial Desk"}
             readTime={readTime}
             bodyHtml={bodyHtml}
             bodyText={rawBodyText}
@@ -205,34 +205,21 @@ export default async function ArticlePage({
             />
           </div>
 
-          {/* ORIGINAL SOURCE VERIFICATION CARD */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 text-sm text-slate-700 no-print">
+          {/* EDITORIAL INTEGRITY & ORIGINAL REPORTING GUARANTEE */}
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-5 text-sm text-slate-700 no-print">
             <div className="flex items-center gap-2 font-bold text-slate-900 mb-1.5">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
               <span>
                 {resolvedLocale === "ne"
-                  ? "स्रोत तथा आधिकारिकता"
-                  : "Source & Attribution"}
+                  ? "मौलिक पत्रकारिता तथा सम्पादकीय ग्यारेन्टी"
+                  : "Original Reporting & Editorial Standards"}
               </span>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed mb-3">
+            <p className="text-xs text-slate-600 leading-relaxed">
               {resolvedLocale === "ne"
-                ? `यो समाचार मूल रूपमा ${article.source} मा प्रकाशित भएको थियो। पूर्ण सन्दर्भ र आधिकारिक विवरणका लागि मूल स्रोत हेर्न सक्नुहुन्छ:`
-                : `This report was originally published by ${article.source}. For direct verification and additional reporting:`}
+                ? "यो समाचार सामग्री ताजा समाचार (TaajaSamachar) को सम्पादकीय टोलीद्वारा तथ्य प्रमाणीकरण, स्थलगत अनुसन्धान र स्वतन्त्र विश्लेषणका साथ तयार पारिएको मौलिक प्रकाशन हो। हामी निष्पक्ष, सन्तुलित र सत्यतथ्य सूचना सम्प्रेषण गर्न प्रतिबद्ध छौं।"
+                : "This article is an original report researched, verified, and produced by the TaajaSamachar editorial desk. We adhere to independent reporting standards and ethical, fact-checked journalism."}
             </p>
-            <a
-              href={article.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-red-700 hover:text-red-800 hover:underline"
-            >
-              <span>
-                {resolvedLocale === "ne"
-                  ? `${article.source} को मूल समाचार पढ्नुहोस्`
-                  : `Read original at ${article.source}`}
-              </span>
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
           </div>
 
           {/* ============================================================= */}

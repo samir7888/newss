@@ -84,7 +84,7 @@ export default async function LocaleHomePage({
 
   // 1 dominant lead story + 3 secondary top stories
   const leadStory = articles[0];
-  const secondaryStories = articles.slice(1, 4);
+  const secondaryStories = articles.slice(1, 6);
   const feedStories = articles.slice(4);
   const trendingStories = articles.slice(0, 5);
 
@@ -154,7 +154,7 @@ export default async function LocaleHomePage({
                   </span>
                   <span className="text-slate-300">•</span>
                   <span className="text-xs text-slate-500 font-medium">
-                    {leadStory.source}
+                    {resolvedLocale === "ne" ? "सम्पादकीय" : "Editorial Desk"}
                   </span>
                 </div>
 
@@ -226,8 +226,8 @@ export default async function LocaleHomePage({
                           </Link>
                         </h3>
                       </div>
-                      <span className="text-[11px] text-slate-400 mt-2">
-                        {story.source}
+                      <span className="text-[11px] text-slate-400 mt-2 font-medium">
+                        {resolvedLocale === "ne" ? "सम्पादकीय" : "Editorial Desk"}
                       </span>
                     </div>
 
@@ -343,20 +343,20 @@ export default async function LocaleHomePage({
               </div>
             </div>
 
-            {/* 5. Journalistic Transparency Card */}
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-xs text-slate-600 leading-relaxed">
-              <div className="flex items-center gap-1.5 font-bold text-slate-800 mb-1.5">
+            {/* 5. Original Journalism & Verification Card */}
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 text-xs text-slate-700 leading-relaxed">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900 mb-1.5">
                 <ShieldCheck className="h-4 w-4 text-emerald-600" />
                 <span>
                   {resolvedLocale === "ne"
-                    ? "पारदर्शी समाचार संकलन"
-                    : "Sourced & Verified"}
+                    ? "मौलिक तथा खोजमूलक पत्रकारिता"
+                    : "Original & Verified Journalism"}
                 </span>
               </div>
               <p>
                 {resolvedLocale === "ne"
-                  ? "हामी अनलाइनखबर, सेतोपाटी, रातोपाटी लगायतका प्रतिष्ठित नेपाली समाचार गृहहरूबाट तथ्यपरक सामग्री द्विभाषिक रूपमा प्रस्तुत गर्दछौं।"
-                  : "All stories aggregate verified reporting directly from Nepal's top national media houses with full attribution."}
+                  ? "हाम्रो सम्पादकीय टोलीले स्थलगत अनुसन्धान, तथ्य प्रमाणीकरण र गहन विश्लेषणसहित मौलिक द्विभाषिक समाचार सामग्रीहरू सम्प्रेषण गर्दछ।"
+                  : "Our newsroom produces original reporting, verified facts, and comprehensive bilingual news coverage across Nepal."}
               </p>
             </div>
           </aside>

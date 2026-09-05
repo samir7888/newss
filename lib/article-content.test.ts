@@ -18,7 +18,7 @@ describe("article-content", () => {
     const resultHtml = toRichHtml(input, "en");
     expect(resultHtml).toContain('<p class="article-lead">');
     expect(resultHtml.length).toBeGreaterThan(1500);
-    expect(resultHtml).toContain("Nepal News Pulse");
+    expect(resultHtml).toContain("TaajaSamachar");
   });
 
   it("increases body content length and generates rich HTML in Nepali", () => {
