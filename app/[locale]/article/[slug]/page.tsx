@@ -18,7 +18,7 @@ import { formatFullDate, formatRelativeTime, calculateReadTime } from "@/lib/for
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Locale } from "@/lib/site";
 
-export const revalidate = 60; // Revalidate every 1 minute (60s)
+export const revalidate = 3600; // Revalidate every 1 hour (3600s) + on-demand via /api/revalidate
 export const dynamicParams = true;
 
 export async function generateStaticParams() {

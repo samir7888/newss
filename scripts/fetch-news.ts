@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "dotenv";
 import { load } from "cheerio";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import Parser from "rss-parser";
 import { closeDatabase, db } from "../lib/db";
 import { articles, categories, sources } from "../lib/db/schema";
@@ -1029,9 +1029,93 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
   }
 }
 
+async function triggerOnDemandRevalidation(
+  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>,
+) {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.SITE_URL ||
+    "https://taajasamachar.basnetsameer.com.np";
+
+  const secret = process.env.REVALIDATE_SECRET || process.env.CRON_SECRET;
+  if (!secret) {
+    console.log(
+      "No REVALIDATE_SECRET or CRON_SECRET configured; skipping on-demand revalidation trigger.",
+    );
+    return;
+  }
+
+  const paths = new Set<string>(["/", "/en"]);
+
+  for (const article of newArticles) {
+    if (article.slugNe) paths.add(`/ne/article/${article.slugNe}`);
+    if (article.slugEn) paths.add(`/en/article/${article.slugEn}`);
+    if (article.category) {
+      paths.add(`/ne/category/${article.category}`);
+      paths.add(`/en/category/${article.category}`);
+    }
+  }
+
+  try {
+    const url = new URL("/api/revalidate", siteUrl).toString();
+    console.log(
+      `Triggering on-demand revalidation for ${paths.size} paths at ${url}...`,
+    );
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-revalidate-secret": secret,
+      },
+      body: JSON.stringify({ paths: Array.from(paths) }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("On-demand revalidation succeeded:", data);
+    } else {
+      const text = await response.text();
+      console.warn(
+        `On-demand revalidation returned status ${response.status}:`,
+        text,
+      );
+    }
+  } catch (error) {
+    console.warn(
+      "Failed to trigger on-demand revalidation:",
+      (error as Error).message,
+    );
+  }
+}
+
 export async function runNewsFetch() {
   const entries = await fetchFeedEntries();
-  const existing = await readPublishedCache();
+  const fileCache = await readPublishedCache();
+
+  let dbCache: Array<{ hash: string; title: string; sourceUrl: string }> = [];
+  try {
+    const recentRows = await db
+      .select({
+        contentHash: articles.contentHash,
+        titleNe: articles.titleNe,
+        titleEn: articles.titleEn,
+        sourceUrl: articles.sourceUrl,
+      })
+      .from(articles)
+      .orderBy(desc(articles.publishedAt))
+      .limit(300);
+
+    dbCache = recentRows.flatMap((row) => [
+      { hash: row.contentHash, title: row.titleNe, sourceUrl: row.sourceUrl },
+      { hash: row.contentHash, title: row.titleEn, sourceUrl: row.sourceUrl },
+    ]);
+  } catch (err) {
+    console.warn("Could not query DB for dedup cache:", (err as Error).message);
+  }
+
+  const existing = [...fileCache, ...dbCache];
   const unique: Array<{
     title: string;
     link: string;
@@ -1226,6 +1310,7 @@ export async function runNewsFetch() {
         ...article,
       })),
     );
+    await triggerOnDemandRevalidation(payload);
   }
 
   const result = {

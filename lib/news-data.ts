@@ -1,4 +1,4 @@
-import { desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { articles, categories } from "@/lib/db/schema";
 import { categories as fallbackCategories } from "@/lib/site";
@@ -145,12 +145,14 @@ export async function getCategories() {
   }, fallbackCategories);
 }
 
-export async function getAllArticleSlugs() {
+export async function getAllArticleSlugs(limit = 60) {
   return await withFallback(async () => {
     const rows = await db
       .select({ slugEn: articles.slugEn, slugNe: articles.slugNe })
       .from(articles)
-      .orderBy(desc(articles.publishedAt));
+      .where(eq(articles.status, "published"))
+      .orderBy(desc(articles.publishedAt))
+      .limit(limit);
 
     return rows.flatMap((row) => [
       { locale: "ne", slug: row.slugNe },
@@ -165,6 +167,7 @@ export async function getLatestArticles(limit = 9) {
       .select(articleFields)
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
+      .where(eq(articles.status, "published"))
       .orderBy(desc(articles.publishedAt))
       .limit(limit);
 
@@ -193,14 +196,20 @@ export async function getArticleBySlug(locale: "ne" | "en", slug: string) {
   }, null);
 }
 
-export async function getArticlesByCategory(categorySlug: string) {
+export async function getArticlesByCategory(categorySlug: string, limit = 30) {
   return await withFallback(async () => {
     const rows = await db
       .select(articleFields)
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
-      .where(eq(categories.slug, categorySlug))
-      .orderBy(desc(articles.publishedAt));
+      .where(
+        and(
+          eq(categories.slug, categorySlug),
+          eq(articles.status, "published"),
+        ),
+      )
+      .orderBy(desc(articles.publishedAt))
+      .limit(limit);
 
     return rows.map((row) => toArticleRecord(row as any));
   }, []);

@@ -14,7 +14,7 @@ import { getCategoryTheme } from "@/lib/category-theme";
 import type { Metadata } from "next";
 import type { Locale } from "@/lib/site";
 
-export const revalidate = 60; // Revalidate every 1 minute (60s)
+export const revalidate = 1800; // Revalidate every 30 minutes (1800s) + on-demand via /api/revalidate
 
 export function generateStaticParams() {
   return [{ locale: "ne" }, { locale: "en" }];
