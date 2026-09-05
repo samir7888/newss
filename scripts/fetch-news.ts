@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "dotenv";
 import { load } from "cheerio";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import Parser from "rss-parser";
 import { closeDatabase, db } from "../lib/db";
 import { articles, categories, sources } from "../lib/db/schema";
@@ -13,6 +13,10 @@ import {
   inferCategoryIdFromText,
   inferCategorySlugFromText,
 } from "../lib/category-inference";
+import {
+  fetchStockImage,
+  extractSearchKeywords,
+} from "../lib/images/fetch-stock-image";
 
 config({ path: ".env.local" });
 
@@ -239,23 +243,6 @@ function getCategory(title: string, snippet: string, defaultCategory: string) {
   return defaultCategory;
 }
 
-function buildUnsplashImageUrl(topic: string) {
-  const imageByCategory: Record<string, string> = {
-    politics:
-      "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80",
-    economy:
-      "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80",
-    technology:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
-    culture:
-      "https://images.unsplash.com/photo-1533130061792-64b345e4a833?auto=format&fit=crop&w=1200&q=80",
-    sports:
-      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80",
-  };
-  const category = topic.split(" ")[0]?.toLowerCase();
-  return imageByCategory[category] || imageByCategory.culture;
-}
-
 export function hasDevanagari(value: string) {
   return /[\u0900-\u097f]/.test(value);
 }
@@ -303,7 +290,7 @@ function getSourceSelectors(url: string) {
 
   const rules: Record<
     string,
-    { title: string[]; description: string[]; body: string[]; image: string[] }
+    { title: string[]; description: string[]; body: string[] }
   > = {
     "onlinekhabar.com": {
       title: ["h1.title", "h1", ".story-title", ".article-title"],
@@ -320,12 +307,6 @@ function getSourceSelectors(url: string) {
         ".story-content p",
         ".entry-content p",
         ".post-content p",
-      ],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".article-image img",
-        ".story-image img",
       ],
     },
 
@@ -349,12 +330,6 @@ function getSourceSelectors(url: string) {
         ".story-content p",
         ".news-content p",
       ],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".content img",
-        ".news-image img",
-      ],
     },
     "ratopati.com": {
       title: ["h1", ".detail-title", ".headline"],
@@ -365,12 +340,6 @@ function getSourceSelectors(url: string) {
         ".story-content p",
         ".content p",
         ".article-content p",
-      ],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".detail-image img",
-        ".story-image img",
       ],
     },
     "nagariknews.nagariknetwork.com": {
@@ -383,7 +352,6 @@ function getSourceSelectors(url: string) {
         ".story-content p",
         ".entry-content p",
       ],
-      image: ["meta[property='og:image']", "article img", ".news-img img"],
     },
     "nepalitimes.com": {
       title: ["h1.entry-title", "h1", ".post-title"],
@@ -393,96 +361,66 @@ function getSourceSelectors(url: string) {
         ".post-excerpt",
       ],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".post-thumbnail img",
-        ".entry-thumbnail img",
-      ],
     },
     "thehimalayantimes.com": {
       title: ["h1.article-title", "h1", ".headline"],
       description: ["meta[name='description']", ".sub-title", ".lead"],
       body: ["article p", ".article-body p", ".story-content p", ".content p", ".post-content p"],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".featured-image img",
-      ],
     },
     "kathmandutribune.com": {
       title: ["h1", ".entry-title", ".headline"],
       description: ["meta[name='description']", ".entry-summary", ".excerpt"],
       body: ["article p", ".entry-content p", ".content p"],
-      image: ["meta[property='og:image']", "article img", ".entry-image img"],
     },
     "techmandu.com": {
       title: ["h1", ".entry-title"],
       description: ["meta[name='description']", ".excerpt"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
-      image: ["meta[property='og:image']", "article img", ".featured-image img"],
     },
     "rajdhanidaily.com": {
       title: ["h1", ".news-title"],
       description: ["meta[name='description']", ".lead"],
       body: ["article p", ".entry-content p", ".content p", ".post-content p"],
-      image: ["meta[property='og:image']", "article img"],
     },
     "newsofnepal.com": {
       title: ["h1", ".news-title"],
       description: ["meta[name='description']", ".lead"],
       body: ["article p", ".entry-content p", ".content p", ".post-content p"],
-      image: ["meta[property='og:image']", "article img"],
     },
     "arthasarokar.com": {
       title: ["h1", ".post-title"],
       description: ["meta[name='description']", ".lead"],
       body: ["article p", ".entry-content p", ".content p", ".post-content p"],
-      image: ["meta[property='og:image']", "article img"],
     },
     "ekantipur.com": {
       title: ["h1", ".article-title", ".news-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".content p", ".article-content p", ".post-content p"],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".article-image img",
-      ],
     },
     "kantipurdaily.com": {
       title: ["h1", ".article-title", ".news-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".content p", ".article-content p", ".post-content p"],
-      image: ["meta[property='og:image']", "article img"],
     },
     "annapurnapost.com": {
       title: ["h1", ".article-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".article-content p", ".entry-content p", ".content p"],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".featured-image img",
-      ],
     },
     "karobardaily.com": {
       title: ["h1", ".entry-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
-      image: ["meta[property='og:image']", "article img"],
     },
     "sharesansar.com": {
       title: ["h1", ".entry-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
-      image: ["meta[property='og:image']", "article img"],
     },
     "bizmandu.com": {
       title: ["h1", ".entry-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
-      image: ["meta[property='og:image']", "article img"],
     },
   };
 
@@ -505,22 +443,8 @@ function getSourceSelectors(url: string) {
         ".post-content p",
         "main p",
       ],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        "main img",
-        ".content img",
-      ],
     }
   );
-}
-
-function resolveImageUrl(value: string, baseUrl: string) {
-  if (!value) return "";
-  if (/^https?:\/\//i.test(value)) return value;
-  if (value.startsWith("//")) return `https:${value}`;
-  if (value.startsWith("/")) return new URL(value, baseUrl).toString();
-  return value;
 }
 
 function isJunkParagraph(text: string): boolean {
@@ -614,18 +538,6 @@ function extractPageData(
         ? structuredData.abstract
         : "";
 
-  const structuredImageValue =
-    typeof structuredData?.image === "string"
-      ? structuredData.image
-      : Array.isArray(structuredData?.image)
-        ? structuredData.image[0]
-        : typeof structuredData?.image === "object" &&
-          structuredData.image !== null
-          ? ((structuredData.image as Record<string, unknown>).url ??
-            (structuredData.image as Record<string, unknown>).contentUrl ??
-            "")
-          : "";
-
   const structuredBodySource =
     typeof structuredData?.articleBody === "string"
       ? structuredData.articleBody
@@ -708,33 +620,6 @@ function extractPageData(
     fallback.snippet,
   ).slice(0, 260);
 
-  const imageUrlFromSelectors = siteRules.image
-    .flatMap((selector) => {
-      const node = $(selector).first();
-      if (node.length === 0) return [];
-      return [
-        resolveImageUrl(
-          node.attr("src") ||
-          node.attr("content") ||
-          node.attr("data-src") ||
-          "",
-          fallback.link,
-        ),
-      ];
-    })
-    .find(Boolean);
-
-  const imageUrl =
-    (typeof structuredImageValue === "string"
-      ? resolveImageUrl(structuredImageValue, fallback.link)
-      : "") ||
-    imageUrlFromSelectors ||
-    $('meta[property="og:image"]').attr("content") ||
-    $('meta[name="twitter:image"]').attr("content") ||
-    candidateRoot.find("img").first().attr("src") ||
-    $("img").first().attr("src") ||
-    buildUnsplashImageUrl(fallback.source);
-
   const publishedAt =
     typeof structuredData?.datePublished === "string"
       ? structuredData.datePublished
@@ -755,7 +640,6 @@ function extractPageData(
     title,
     excerpt,
     body,
-    imageUrl,
     publishedAt,
   };
 }
@@ -1072,6 +956,17 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
   }
 
   try {
+    await db.execute(
+      sql`ALTER TABLE "articles" ADD COLUMN IF NOT EXISTS "image_credit_url" text;`,
+    );
+  } catch (error) {
+    console.warn(
+      "Failed to ensure image_credit_url column exists:",
+      (error as Error).message,
+    );
+  }
+
+  try {
     const rows = await Promise.all(
       payload.map(async (item) => {
         const record = item as Record<string, unknown>;
@@ -1113,7 +1008,8 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
           contentHash: String(record.contentHash ?? contentHash(articleTitle)),
           imageUrl: String(record.imageUrl ?? ""),
           imageAlt: String(record.imageAlt ?? articleTitle),
-          imageCredit: String(record.imageCredit ?? sourceName),
+          imageCredit: String(record.imageCredit ?? "Unsplash"),
+          imageCreditUrl: String(record.imageCreditUrl ?? "https://unsplash.com"),
           status: String(record.status ?? "published"),
           publishedAt:
             record.publishedAt instanceof Date
@@ -1182,7 +1078,6 @@ export async function runNewsFetch() {
           title: fallbackTitle,
           excerpt: entry.snippet,
           body: [entry.snippet],
-          imageUrl: buildUnsplashImageUrl(entry.category),
           publishedAt: new Date().toISOString(),
         };
 
@@ -1275,6 +1170,12 @@ export async function runNewsFetch() {
         "ne",
       );
 
+      const searchKeywords = extractSearchKeywords(
+        titleEn || rawTitle,
+        sourceCategory,
+      );
+      const stockImage = await fetchStockImage(searchKeywords, sourceCategory);
+
       processedPayload.push({
         slugEn: `${slug}-en-${timestamp}`,
         slugNe: `${slug}-ne-${timestamp}`,
@@ -1289,9 +1190,10 @@ export async function runNewsFetch() {
         sourceUrl: entry.link,
         sourceHeadline: rawTitle,
         contentHash: contentHash(entry.title),
-        imageUrl: pageData.imageUrl || buildUnsplashImageUrl(sourceCategory),
-        imageAlt: `${titleEn || titleNe} image`,
-        imageCredit: entry.source,
+        imageUrl: stockImage.imageUrl,
+        imageAlt: stockImage.imageAlt || `${titleEn || titleNe} image`,
+        imageCredit: stockImage.imageCredit,
+        imageCreditUrl: stockImage.imageCreditUrl,
         sourceName: entry.source,
         publishedAt: new Date(pageData.publishedAt),
         status: "published",

@@ -16,6 +16,8 @@ export type NewsArticle = {
   category: string;
   image: string;
   imageAlt: { ne: string; en: string };
+  imageCredit?: string | null;
+  imageCreditUrl?: string | null;
   publishedAt: string;
   source: string;
   sourceUrl: string;
@@ -43,6 +45,8 @@ function toArticleRecord(row: {
   bodyNe: string;
   imageUrl: string;
   imageAlt: string;
+  imageCredit?: string | null;
+  imageCreditUrl?: string | null;
   publishedAt: Date | string | null;
   sourceHeadline: string;
   sourceUrl: string;
@@ -80,6 +84,8 @@ function toArticleRecord(row: {
       ne: row.titleNe,
       en: row.titleEn,
     },
+    imageCredit: row.imageCredit ?? null,
+    imageCreditUrl: row.imageCreditUrl ?? null,
     publishedAt: row.publishedAt
       ? new Date(row.publishedAt).toISOString()
       : new Date().toISOString(),
@@ -101,6 +107,8 @@ const articleFields = {
   bodyNe: articles.bodyNe,
   imageUrl: articles.imageUrl,
   imageAlt: articles.imageAlt,
+  imageCredit: articles.imageCredit,
+  imageCreditUrl: articles.imageCreditUrl,
   publishedAt: articles.publishedAt,
   sourceHeadline: articles.sourceHeadline,
   sourceUrl: articles.sourceUrl,

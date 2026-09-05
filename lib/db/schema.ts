@@ -46,6 +46,7 @@ export const articles = pgTable("articles", {
   imageUrl: text("image_url").notNull(),
   imageAlt: text("image_alt").notNull(),
   imageCredit: text("image_credit"),
+  imageCreditUrl: text("image_credit_url"),
   status: varchar("status", { length: 16 }).default("published"),
   viewCount: integer("view_count").default(0),
   likesCount: integer("likes_count").default(0),

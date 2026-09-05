@@ -204,11 +204,28 @@ export default async function ArticlePage({
                 alt={article.imageAlt[resolvedLocale] || article.title[resolvedLocale]}
                 fill
                 priority
+                unoptimized
                 sizes="(max-width: 768px) 100vw, 760px"
                 className="object-cover"
               />
             </div>
-
+            {article.imageCredit && (
+              <figcaption className="mt-2 text-xs text-slate-500 text-right flex items-center justify-end gap-1">
+                <span>{resolvedLocale === "ne" ? "तस्बिर:" : "Photo:"}</span>
+                {article.imageCreditUrl ? (
+                  <a
+                    href={article.imageCreditUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-slate-600 hover:text-slate-900 transition-colors"
+                  >
+                    {article.imageCredit}
+                  </a>
+                ) : (
+                  <span>{article.imageCredit}</span>
+                )}
+              </figcaption>
+            )}
           </figure>
 
           {/* ============================================================= */}

@@ -127,6 +127,7 @@ export default async function LocaleHomePage({
                   alt={leadStory.imageAlt[resolvedLocale] || leadStory.title[resolvedLocale]}
                   fill
                   priority
+                  unoptimized
                   sizes="(max-width: 1024px) 100vw, 65vw"
                   className="object-cover transition duration-500 group-hover:scale-103"
                 />
@@ -236,6 +237,7 @@ export default async function LocaleHomePage({
                         src={story.image}
                         alt={story.imageAlt[resolvedLocale] || story.title[resolvedLocale]}
                         fill
+                        unoptimized
                         sizes="(max-width: 640px) 96px, 112px"
                         className="object-cover transition duration-300 group-hover:scale-105"
                       />

@@ -70,6 +70,7 @@ export function ArticleCard({
             src={article.image}
             alt={article.imageAlt[locale] || title}
             fill
+            unoptimized
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover transition duration-300 group-hover:scale-105"
           />
@@ -155,6 +156,7 @@ export function ArticleCard({
           src={article.image}
           alt={article.imageAlt[locale] || title}
           fill
+          unoptimized
           sizes="(max-width: 640px) 112px, 176px"
           className="object-cover transition duration-300 group-hover:scale-105"
         />

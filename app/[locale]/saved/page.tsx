@@ -119,6 +119,7 @@ export default function SavedArticlesPage({
                         src={item.image}
                         alt={item.title}
                         fill
+                        unoptimized
                         className="object-cover"
                       />
                     </div>
