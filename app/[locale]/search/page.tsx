@@ -5,8 +5,35 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { searchArticles, getCategories } from "@/lib/news-data";
 import type { Locale } from "@/lib/site";
+import type { Metadata } from "next";
 
 export const revalidate = 60; // Revalidate every 1 minute (60s)
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ q?: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { q } = await searchParams;
+  const resolvedLocale: Locale = locale === "en" ? "en" : "ne";
+  const title = q
+    ? `${q} - ${resolvedLocale === "ne" ? "समाचार खोजी" : "Search Results"} | नेपाली समाचार`
+    : `${resolvedLocale === "ne" ? "समाचार खोजी" : "Search News"} | नेपाली समाचार`;
+
+  return {
+    title,
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: `/${resolvedLocale}/search`,
+    },
+  };
+}
 
 export default async function SearchPage({
   params,

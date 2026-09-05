@@ -10,6 +10,7 @@ import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { getArticlesByCategory, getCategories, getLatestArticles } from "@/lib/news-data";
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Locale } from "@/lib/site";
+import type { Metadata } from "next";
 
 export const revalidate = 60; // Revalidate every 1 minute (60s)
 export const dynamicParams = true;
@@ -27,6 +28,45 @@ export function generateStaticParams() {
     { locale: "ne", slug: "sports" },
     { locale: "en", slug: "sports" },
   ];
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const resolvedLocale: Locale = locale === "en" ? "en" : "ne";
+  const categoriesList = await getCategories();
+  const category = categoriesList.find((item) => item.slug === slug);
+  const categoryName = category ? category.name[resolvedLocale] : slug;
+
+  const title =
+    resolvedLocale === "ne"
+      ? `${categoryName} समाचार | ताजा अपडेट - नेपाली समाचार`
+      : `${categoryName} News | Latest Updates - Nepali Samachar`;
+  const description =
+    resolvedLocale === "ne"
+      ? `${categoryName} सम्बन्धी ताजा र महत्त्वपूर्ण समाचारहरू।`
+      : `Latest news and in-depth updates on ${categoryName} from Nepal.`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/${resolvedLocale}/category/${slug}`,
+      languages: {
+        ne: `/ne/category/${slug}`,
+        en: `/en/category/${slug}`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `/${resolvedLocale}/category/${slug}`,
+      siteName: "नेपाली समाचार | Nepali Samachar",
+    },
+  };
 }
 
 export default async function CategoryPage({

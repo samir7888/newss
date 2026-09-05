@@ -20,21 +20,24 @@ const devanagari = Noto_Sans_Devanagari({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ||
+const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL ||
-  "http://localhost:3000";
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://nepalisamachar.xyz"
+).replace(/\/$/, "");
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ताजा समाचार | Taaja Samachar | TaajaSamachar",
-    template: "%s | ताजा समाचार",
+    default: "नेपाली समाचार | Nepali Samachar | ताजा समाचार",
+    template: "%s | नेपाली समाचार",
   },
   description:
-    "ताजा नेपाली समाचार, नेपालका मुख्य खबर, राजनीति, अर्थतन्त्र, खेलकुद, प्रविधि र मनोरञ्जनका विश्वसनीय अपडेट। Latest Nepal news and Nepali samachar in English and Nepali.",
+    "नेपाली समाचार - नेपालका ताजा तथा मुख्य खबर, राजनीति, अर्थतन्त्र, खेलकुद, प्रविधि र मनोरञ्जनका विश्वसनीय अपडेट। Latest Nepal news and Nepali samachar in English and Nepali.",
   keywords: [
     "नेपाली समाचार",
+    "Nepali samachar",
+    "NepaliSamachar",
     "ताजा समाचार",
     "नेपाल समाचार",
     "आजको समाचार",
@@ -43,7 +46,6 @@ export const metadata: Metadata = {
     "आर्थिक समाचार",
     "खेलकुद समाचार",
     "प्रविधि समाचार",
-    "Nepali samachar",
     "Nepal news",
     "latest Nepal news",
     "breaking news Nepal",
@@ -59,8 +61,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "ताजा समाचार | Taaja Samachar",
-    title: "ताजा समाचार | Taaja Samachar | Nepal News",
+    siteName: "नेपाली समाचार | Nepali Samachar",
+    title: "नेपाली समाचार | Nepali Samachar | Nepal News",
     description:
       "ताजा नेपाली समाचार र नेपालका मुख्य खबरहरू, नेपाली र अंग्रेजी भाषामा।",
     url: siteUrl,
@@ -69,7 +71,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ताजा समाचार | Taaja Samachar",
+    title: "नेपाली समाचार | Nepali Samachar",
     description: "ताजा नेपाली समाचार र नेपालका मुख्य खबरहरू।",
   },
   icons: {
@@ -89,6 +91,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsMediaOrganization",
+    name: "Nepali Samachar",
+    alternateName: ["नेपाली समाचार", "NepaliSamachar", "ताजा समाचार", "Taaja Samachar"],
+    url: siteUrl,
+    logo: `${siteUrl}/logo.png`,
+    sameAs: ["https://nepalisamachar.xyz"],
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteUrl}/ne/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html
       lang="ne"
@@ -96,6 +113,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} h-full antialiased`}
     >
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         {adsenseId && (
           <Script
             async

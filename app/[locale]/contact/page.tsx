@@ -16,10 +16,17 @@ export async function generateMetadata({
     const { locale } = await params;
     const isNe = locale !== "en";
     return {
-        title: isNe ? "हामीलाई सम्पर्क गर्नुहोस् | ताजा समाचार" : "Contact Us | TaajaSamachar",
+        title: isNe ? "हामीलाई सम्पर्क गर्नुहोस् | नेपाली समाचार" : "Contact Us | Nepali Samachar",
         description: isNe
-            ? "ताजा समाचारको टोलीसँग सम्पर्क गर्नुहोस्। सुझाव, प्रश्न वा सहयोगका लागि हामीलाई इमेल गर्नुहोस्।"
-            : "Get in touch with the TaajaSamachar team. Send us your feedback, questions, or partnership inquiries.",
+            ? "नेपाली समाचारको टोलीसँग सम्पर्क गर्नुहोस्। सुझाव, प्रश्न वा सहयोगका लागि हामीलाई इमेल गर्नुहोस्।"
+            : "Get in touch with the Nepali Samachar team. Send us your feedback, questions, or partnership inquiries.",
+        alternates: {
+            canonical: `/${isNe ? "ne" : "en"}/contact`,
+            languages: {
+                ne: "/ne/contact",
+                en: "/en/contact",
+            },
+        },
     };
 }
 

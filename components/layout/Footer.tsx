@@ -15,13 +15,13 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
             <div className="flex items-center gap-2.5">
               <Image
                 src="/logo.png"
-                alt={locale === "ne" ? "ताजा समाचार" : "TaajaSamachar"}
+                alt={locale === "ne" ? "नेपाली समाचार" : "Nepali Samachar"}
                 width={197}
                 height={148}
                 className="h-10 w-auto"
               />
               <span className="text-xl font-bold tracking-tight text-white">
-                {locale === "ne" ? "ताजा समाचार" : "TaajaSamachar"}
+                {locale === "ne" ? "नेपाली समाचार" : "Nepali Samachar"}
               </span>
             </div>
             <p className="mt-3 text-sm text-slate-400 leading-relaxed max-w-md">
@@ -107,7 +107,7 @@ export function Footer({ locale = "ne" }: { locale?: Locale }) {
         {/* Bottom Bar */}
         <div className="mt-10 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>
-            © {currentYear} {locale === "ne" ? "ताजा समाचार" : "TaajaSamachar"}.{" "}
+            © {currentYear} {locale === "ne" ? "नेपाली समाचार" : "Nepali Samachar"}.{" "}
             {locale === "ne" ? "सर्वाधिकार सुरक्षित।" : "All rights reserved."}
           </p>
           <div className="flex items-center gap-4">

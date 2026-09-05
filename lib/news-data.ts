@@ -83,7 +83,7 @@ function toArticleRecord(row: {
     publishedAt: row.publishedAt
       ? new Date(row.publishedAt).toISOString()
       : new Date().toISOString(),
-    source: "TaajaSamachar",
+    source: "Nepali Samachar",
     sourceUrl: "/",
     likesCount: row.likesCount ?? 0,
   };

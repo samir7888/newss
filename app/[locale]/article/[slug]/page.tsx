@@ -37,9 +37,14 @@ export async function generateMetadata({
 
   const title = article.title[resolvedLocale];
   const description = article.excerpt[resolvedLocale];
+  const currentSlug =
+    resolvedLocale === "ne" && "slugNe" in article
+      ? article.slugNe
+      : article.slug;
+  const canonicalPath = `/${resolvedLocale}/article/${currentSlug || slug}`;
 
   return {
-    title: `${title} | ताजा समाचार`,
+    title: `${title} | नेपाली समाचार`,
     description,
     openGraph: {
       title,
@@ -47,8 +52,11 @@ export async function generateMetadata({
       images: [{ url: article.image }],
       type: "article",
       publishedTime: article.publishedAt,
+      url: canonicalPath,
+      siteName: "नेपाली समाचार | Nepali Samachar",
     },
     alternates: {
+      canonical: canonicalPath,
       languages: {
         ne: `/ne/article/${article.slugNe || slug}`,
         en: `/en/article/${article.slugEn || slug}`,
@@ -100,8 +108,47 @@ export default async function ArticlePage({
       ? (article.bodyHtml as { ne: string; en: string })[resolvedLocale]
       : toRichHtml(rawBodyText, resolvedLocale);
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "https://nepalisamachar.xyz"
+  ).replace(/\/$/, "");
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title[resolvedLocale],
+    description: article.excerpt[resolvedLocale],
+    image: [article.image],
+    datePublished: article.publishedAt,
+    dateModified: article.publishedAt,
+    inLanguage: resolvedLocale === "ne" ? "ne-NP" : "en-US",
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/${resolvedLocale}/article/${currentSlug}`,
+    },
+    author: {
+      "@type": "Organization",
+      name: "Nepali Samachar Editorial Desk",
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "NewsMediaOrganization",
+      name: "Nepali Samachar",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/logo.png`,
+      },
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <ReadingProgress />
       <Header locale={resolvedLocale} alternateHref={alternateHref} />
 
@@ -217,8 +264,8 @@ export default async function ArticlePage({
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
               {resolvedLocale === "ne"
-                ? "यो समाचार सामग्री ताजा समाचार (TaajaSamachar) को सम्पादकीय टोलीद्वारा तथ्य प्रमाणीकरण, स्थलगत अनुसन्धान र स्वतन्त्र विश्लेषणका साथ तयार पारिएको मौलिक प्रकाशन हो। हामी निष्पक्ष, सन्तुलित र सत्यतथ्य सूचना सम्प्रेषण गर्न प्रतिबद्ध छौं।"
-                : "This article is an original report researched, verified, and produced by the TaajaSamachar editorial desk. We adhere to independent reporting standards and ethical, fact-checked journalism."}
+                ? "यो समाचार सामग्री नेपाली समाचार (Nepali Samachar) को सम्पादकीय टोलीद्वारा तथ्य प्रमाणीकरण, स्थलगत अनुसन्धान र स्वतन्त्र विश्लेषणका साथ तयार पारिएको मौलिक प्रकाशन हो। हामी निष्पक्ष, सन्तुलित र सत्यतथ्य सूचना सम्प्रेषण गर्न प्रतिबद्ध छौं।"
+                : "This article is an original report researched, verified, and produced by the Nepali Samachar editorial desk. We adhere to independent reporting standards and ethical, fact-checked journalism."}
             </p>
           </div>
 

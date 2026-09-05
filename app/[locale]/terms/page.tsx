@@ -1,9 +1,32 @@
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { LegalPage } from "@/components/legal/LegalPage";
+import type { Metadata } from "next";
 
 export function generateStaticParams() {
     return [{ locale: "ne" }, { locale: "en" }];
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const isNe = locale !== "en";
+    return {
+        title: isNe ? "नियम तथा सर्तहरू | नेपाली समाचार" : "Terms and Conditions | Nepali Samachar",
+        description: isNe
+            ? "नेपाली समाचार वेबसाइट प्रयोगका नियम तथा सर्तहरू।"
+            : "Terms and Conditions for using Nepali Samachar website and services.",
+        alternates: {
+            canonical: `/${isNe ? "ne" : "en"}/terms`,
+            languages: {
+                ne: "/ne/terms",
+                en: "/en/terms",
+            },
+        },
+    };
 }
 
 const termsContent = {

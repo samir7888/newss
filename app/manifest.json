@@ -1,7 +1,7 @@
 {
-  "name": "ताजा समाचार | Taaja Samachar",
-  "short_name": "ताजा समाचार",
-  "description": "ताजा नेपाली समाचार र नेपालका मुख्य खबरहरू।",
+  "name": "नेपाली समाचार | Nepali Samachar",
+  "short_name": "नेपाली समाचार",
+  "description": "नेपाली समाचार - नेपालका मुख्य तथा ताजा खबरहरू।",
   "lang": "ne-NP",
   "start_url": "/ne",
   "scope": "/",

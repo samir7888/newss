@@ -15,10 +15,17 @@ export async function generateMetadata({
     const { locale } = await params;
     const isNe = locale !== "en";
     return {
-        title: isNe ? "हाम्रो बारेमा | ताजा समाचार" : "About Us | TaajaSamachar",
+        title: isNe ? "हाम्रो बारेमा | नेपाली समाचार" : "About Us | Nepali Samachar",
         description: isNe
-            ? "ताजा समाचार नेपालको मौलिक तथा स्वतन्त्र द्विभाषिक डिजिटल पत्रिका हो। हाम्रो सम्पादकीय मिसन र पत्रकारिता मूल्यहरू जान्नुहोस्।"
-            : "TaajaSamachar is an independent bilingual digital news publication. Learn about our mission, original reporting, and editorial values.",
+            ? "नेपाली समाचार नेपालको मौलिक तथा स्वतन्त्र द्विभाषिक डिजिटल पत्रिका हो। हाम्रो सम्पादकीय मिसन र पत्रकारिता मूल्यहरू जान्नुहोस्।"
+            : "Nepali Samachar is an independent bilingual digital news publication. Learn about our mission, original reporting, and editorial values.",
+        alternates: {
+            canonical: `/${isNe ? "ne" : "en"}/about`,
+            languages: {
+                ne: "/ne/about",
+                en: "/en/about",
+            },
+        },
     };
 }
 
@@ -27,7 +34,7 @@ const aboutContent = {
         title: "About Us",
         lastUpdated: "September 2026",
         intro:
-            "TaajaSamachar (ताजा समाचार) is an independent bilingual digital news publication dedicated to delivering original, fact-checked, and in-depth reporting to readers in both Nepali and English.",
+            "Nepali Samachar (नेपाली समाचार) is an independent bilingual digital news publication dedicated to delivering original, fact-checked, and in-depth reporting to readers in both Nepali and English.",
         sections: [
             {
                 heading: "Who We Are",
@@ -53,7 +60,7 @@ const aboutContent = {
             {
                 heading: "Original Reporting & Fact-Checking",
                 body: [
-                    "All stories published on TaajaSamachar are researched, written, and verified by our editorial desk. We conduct primary fact-checking, verify eyewitness accounts, cross-examine official statements, and adhere to rigorous journalistic ethics.",
+                    "All stories published on Nepali Samachar are researched, written, and verified by our editorial desk. We conduct primary fact-checking, verify eyewitness accounts, cross-examine official statements, and adhere to rigorous journalistic ethics.",
                     "We take full editorial ownership and responsibility for our content. Every article undergoes strict review for accuracy, impartiality, and fairness before publication.",
                 ],
             },
@@ -85,7 +92,7 @@ const aboutContent = {
         title: "हाम्रो बारेमा",
         lastUpdated: "भाद्र २०८३",
         intro:
-            "ताजा समाचार (TaajaSamachar) काठमाडौंमा आधारित एक स्वतन्त्र तथा मौलिक द्विभाषिक डिजिटल समाचार पत्रिका हो। हामी खोजमूलक, तथ्यपरक र निष्पक्ष पत्रकारितामार्फत नेपाली र अंग्रेजी दुवै भाषामा पाठकहरूसमक्ष भरपर्दो समाचार सम्प्रेषण गर्न समर्पित छौं।",
+            "नेपाली समाचार (Nepali Samachar) काठमाडौंमा आधारित एक स्वतन्त्र तथा मौलिक द्विभाषिक डिजिटल समाचार पत्रिका हो। हामी खोजमूलक, तथ्यपरक र निष्पक्ष पत्रकारितामार्फत नेपाली र अंग्रेजी दुवै भाषामा पाठकहरूसमक्ष भरपर्दो समाचार सम्प्रेषण गर्न समर्पित छौं।",
         sections: [
             {
                 heading: "हामी को हौं",
@@ -111,7 +118,7 @@ const aboutContent = {
             {
                 heading: "मौलिक रिपोर्टिङ तथा सम्पादकीय मापदण्ड",
                 body: [
-                    "ताजा समाचारमा प्रकाशित हुने सामग्रीहरू हाम्रो आफ्नै सम्पादकीय टोलीद्वारा स्थलगत रिपोर्टिङ, प्रत्यक्ष तथ्य प्रमाणीकरण र गहन अध्ययनका आधारमा तयार पारिएका मौलिक सामग्रीहरू हुन्।",
+                    "नेपाली समाचारमा प्रकाशित हुने सामग्रीहरू हाम्रो आफ्नै सम्पादकीय टोलीद्वारा स्थलगत रिपोर्टिङ, प्रत्यक्ष तथ्य प्रमाणीकरण र गहन अध्ययनका आधारमा तयार पारिएका मौलिक सामग्रीहरू हुन्।",
                     "हामी पत्रकारिताको आचारसंहिता, निष्पक्षता र शुद्धतालाई कडाइका साथ पालना गर्छौं। प्रत्येक सामग्री सम्पादन र प्रमाणीकरण प्रक्रिया पार गरेपछि मात्र प्रकाशित गरिन्छ।",
                 ],
             },

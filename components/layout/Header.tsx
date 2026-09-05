@@ -104,7 +104,7 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
             >
               <Image
                 src="/logo.png"
-                alt={locale === "ne" ? "ताजा समाचार" : "Nepal News"}
+                alt={locale === "ne" ? "नेपाली समाचार" : "Nepali Samachar"}
                 width={197}
                 height={148}
                 priority
@@ -219,13 +219,13 @@ export function Header({ locale, alternateHref, tickerItems }: HeaderProps) {
               <div className="flex items-center gap-2">
                 <Image
                   src="/logo.png"
-                  alt={locale === "ne" ? "ताजा समाचार" : "Nepal News"}
+                  alt={locale === "ne" ? "नेपाली समाचार" : "Nepali Samachar"}
                   width={197}
                   height={148}
                   className="h-8 w-auto"
                 />
                 <span className="font-bold text-slate-900 text-base">
-                  {locale === "ne" ? "ताजा समाचार" : "Nepal News"}
+                  {locale === "ne" ? "नेपाली समाचार" : "Nepali Samachar"}
                 </span>
               </div>
               <button

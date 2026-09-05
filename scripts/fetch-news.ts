@@ -1076,7 +1076,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
       payload.map(async (item) => {
         const record = item as Record<string, unknown>;
         const categorySlug = String(record.category ?? "politics");
-        const sourceName = String(record.sourceName ?? "TaajaSamachar");
+        const sourceName = String(record.sourceName ?? "Nepali Samachar");
         const sourceUrl = String(
           record.sourceUrl ?? "https://www.nepalnews.com",
         );

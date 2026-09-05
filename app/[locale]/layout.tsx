@@ -8,16 +8,17 @@ export function generateStaticParams() {
 
 export const metadata: Metadata = {
     title: {
-        default: "ताजा समाचार | Taaja Samachar",
-        template: "%s | Taaja Samachar",
+        default: "नेपाली समाचार | Nepali Samachar | ताजा समाचार",
+        template: "%s | नेपाली समाचार",
     },
-    description: "ताजा नेपाली समाचार, नेपालका मुख्य खबर र विश्वसनीय समाचार अपडेट।",
+    description: "नेपाली समाचार - ताजा नेपाली समाचार, नेपालका मुख्य खबर र विश्वसनीय समाचार अपडेट।",
     keywords: [
         "नेपाली समाचार",
+        "Nepali samachar",
+        "NepaliSamachar",
         "ताजा समाचार",
         "नेपाल समाचार",
         "आजको समाचार",
-        "Nepali samachar",
         "Nepal news",
         "latest Nepal news",
     ],

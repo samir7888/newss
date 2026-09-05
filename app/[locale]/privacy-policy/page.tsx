@@ -1,9 +1,32 @@
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { LegalPage } from "@/components/legal/LegalPage";
+import type { Metadata } from "next";
 
 export function generateStaticParams() {
     return [{ locale: "ne" }, { locale: "en" }];
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const isNe = locale !== "en";
+    return {
+        title: isNe ? "गोपनीयता नीति | नेपाली समाचार" : "Privacy Policy | Nepali Samachar",
+        description: isNe
+            ? "नेपाली समाचार वेबसाइटको गोपनीयता नीति तथा डाटा सुरक्षा सम्बन्धी जानकारी।"
+            : "Privacy Policy and data protection practices of Nepali Samachar.",
+        alternates: {
+            canonical: `/${isNe ? "ne" : "en"}/privacy-policy`,
+            languages: {
+                ne: "/ne/privacy-policy",
+                en: "/en/privacy-policy",
+            },
+        },
+    };
 }
 
 const privacyContent = {

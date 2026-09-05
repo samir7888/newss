@@ -59,7 +59,7 @@ export const articles: Article[] = [
       en: "Railway line and station image",
     },
     publishedAt: "2026-08-25T08:15:00.000Z",
-    source: "TaajaSamachar",
+    source: "Nepali Samachar",
     sourceUrl: "/",
   },
   {
@@ -94,7 +94,7 @@ export const articles: Article[] = [
       en: "Mountain landscape with visitors",
     },
     publishedAt: "2026-08-27T10:05:00.000Z",
-    source: "TaajaSamachar",
+    source: "Nepali Samachar",
     sourceUrl: "/",
   },
   {
@@ -129,7 +129,7 @@ export const articles: Article[] = [
       en: "Startup team and computer workspace",
     },
     publishedAt: "2026-08-29T12:00:00.000Z",
-    source: "TaajaSamachar",
+    source: "Nepali Samachar",
     sourceUrl: "/",
   },
   {
@@ -164,7 +164,7 @@ export const articles: Article[] = [
       en: "Classroom and digital learning image",
     },
     publishedAt: "2026-08-30T09:15:00.000Z",
-    source: "TaajaSamachar",
+    source: "Nepali Samachar",
     sourceUrl: "/",
   },
   {
@@ -199,7 +199,7 @@ export const articles: Article[] = [
       en: "Sports field and athlete training image",
     },
     publishedAt: "2026-08-31T07:20:00.000Z",
-    source: "TaajaSamachar",
+    source: "Nepali Samachar",
     sourceUrl: "/",
   },
 ];

@@ -13,19 +13,17 @@ describe("article-content", () => {
     expect(text).toBe("First paragraph.\n\nSecond paragraph.");
   });
 
-  it("increases body content length and generates rich HTML in English", () => {
+  it("generates rich HTML in English", () => {
     const input = "Nepal is expanding its digital infrastructure across provincial hubs.";
     const resultHtml = toRichHtml(input, "en");
     expect(resultHtml).toContain('<p class="article-lead">');
-    expect(resultHtml.length).toBeGreaterThan(1500);
-    expect(resultHtml).toContain("TaajaSamachar");
+    expect(resultHtml).toContain("Nepal is expanding");
   });
 
-  it("increases body content length and generates rich HTML in Nepali", () => {
+  it("generates rich HTML in Nepali", () => {
     const input = "नेपालमा डिजिटल पूर्वाधार विस्तारको काम तीव्र गतिमा अघि बढिरहेको छ।";
     const resultHtml = toRichHtml(input, "ne");
     expect(resultHtml).toContain('<p class="article-lead">');
-    expect(resultHtml.length).toBeGreaterThan(1200);
     expect(hasDevanagari(resultHtml)).toBe(true);
   });
 

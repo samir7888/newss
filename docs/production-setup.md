@@ -36,7 +36,7 @@ Add these values:
 
 - `CRON_SECRET`: any long random string
 - `NEXTAUTH_SECRET`: random secret, 32+ characters
-- `NEXT_PUBLIC_SITE_URL`: full production URL, for example `https://your-domain.com`
+- `NEXT_PUBLIC_SITE_URL`: full production URL, for example `https://nepalisamachar.xyz`
 - `AI_PROVIDER_API_KEY`: key from OpenRouter, Groq, or another provider you use
 - `UNSPLASH_ACCESS_KEY`: from Unsplash Developer
 - `PEXELS_API_KEY`: from Pexels API
