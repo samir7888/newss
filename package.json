@@ -11,6 +11,7 @@
     "news:fetch": "tsx scripts/fetch-news.ts",
     "news:translate": "tsx scripts/translate-existing-news.ts",
     "news:repair-categories": "tsx scripts/repair-article-categories.ts",
+    "news:check-images": "tsx scripts/check-published-images.ts",
     "seed:db": "tsx scripts/seed-db.ts"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
+    "image-size": "^2.0.2",
     "lucide-react": "^1.38.0",
     "next": "16.3.4",
     "next-intl": "^4.14.1",

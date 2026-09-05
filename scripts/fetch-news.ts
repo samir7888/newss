@@ -17,6 +17,7 @@ import {
   fetchStockImage,
   extractSearchKeywords,
 } from "../lib/images/fetch-stock-image";
+import { checkImageQuality } from "../lib/images/check-image-quality";
 
 config({ path: ".env.local" });
 
@@ -290,7 +291,7 @@ function getSourceSelectors(url: string) {
 
   const rules: Record<
     string,
-    { title: string[]; description: string[]; body: string[] }
+    { title: string[]; description: string[]; body: string[]; image?: string[] }
   > = {
     "onlinekhabar.com": {
       title: ["h1.title", "h1", ".story-title", ".article-title"],
@@ -307,6 +308,11 @@ function getSourceSelectors(url: string) {
         ".story-content p",
         ".entry-content p",
         ".post-content p",
+      ],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".ok18-single-post-content-wrap img",
       ],
     },
 
@@ -330,6 +336,7 @@ function getSourceSelectors(url: string) {
         ".story-content p",
         ".news-content p",
       ],
+      image: ["meta[property='og:image']", "article img", ".news-media img"],
     },
     "ratopati.com": {
       title: ["h1", ".detail-title", ".headline"],
@@ -341,6 +348,7 @@ function getSourceSelectors(url: string) {
         ".content p",
         ".article-content p",
       ],
+      image: ["meta[property='og:image']", "article img", ".detail-img img"],
     },
     "nagariknews.nagariknetwork.com": {
       title: ["h1", ".headline", ".news-title"],
@@ -352,6 +360,7 @@ function getSourceSelectors(url: string) {
         ".story-content p",
         ".entry-content p",
       ],
+      image: ["meta[property='og:image']", "article img", ".news-image img"],
     },
     "nepalitimes.com": {
       title: ["h1.entry-title", "h1", ".post-title"],
@@ -361,66 +370,87 @@ function getSourceSelectors(url: string) {
         ".post-excerpt",
       ],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img", ".entry-image img"],
     },
     "thehimalayantimes.com": {
       title: ["h1.article-title", "h1", ".headline"],
       description: ["meta[name='description']", ".sub-title", ".lead"],
       body: ["article p", ".article-body p", ".story-content p", ".content p", ".post-content p"],
+      image: ["meta[property='og:image']", "article img", ".featured-image img"],
     },
     "kathmandutribune.com": {
       title: ["h1", ".entry-title", ".headline"],
       description: ["meta[name='description']", ".entry-summary", ".excerpt"],
       body: ["article p", ".entry-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img", ".entry-content img"],
     },
     "techmandu.com": {
       title: ["h1", ".entry-title"],
       description: ["meta[name='description']", ".excerpt"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img", ".featured-image img"],
     },
     "rajdhanidaily.com": {
       title: ["h1", ".news-title"],
       description: ["meta[name='description']", ".lead"],
       body: ["article p", ".entry-content p", ".content p", ".post-content p"],
+      image: ["meta[property='og:image']", "article img"],
     },
     "newsofnepal.com": {
       title: ["h1", ".news-title"],
       description: ["meta[name='description']", ".lead"],
       body: ["article p", ".entry-content p", ".content p", ".post-content p"],
+      image: ["meta[property='og:image']", "article img"],
     },
     "arthasarokar.com": {
       title: ["h1", ".post-title"],
       description: ["meta[name='description']", ".lead"],
       body: ["article p", ".entry-content p", ".content p", ".post-content p"],
+      image: ["meta[property='og:image']", "article img"],
     },
     "ekantipur.com": {
       title: ["h1", ".article-title", ".news-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".content p", ".article-content p", ".post-content p"],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".article-image img",
+      ],
     },
     "kantipurdaily.com": {
       title: ["h1", ".article-title", ".news-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".content p", ".article-content p", ".post-content p"],
+      image: ["meta[property='og:image']", "article img"],
     },
     "annapurnapost.com": {
       title: ["h1", ".article-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".article-content p", ".entry-content p", ".content p"],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".featured-image img",
+      ],
     },
     "karobardaily.com": {
       title: ["h1", ".entry-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img"],
     },
     "sharesansar.com": {
       title: ["h1", ".entry-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img"],
     },
     "bizmandu.com": {
       title: ["h1", ".entry-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
+      image: ["meta[property='og:image']", "article img"],
     },
   };
 
@@ -443,8 +473,38 @@ function getSourceSelectors(url: string) {
         ".post-content p",
         "main p",
       ],
+      image: [
+        "meta[property='og:image']",
+        "meta[name='twitter:image']",
+        "article img",
+        "main img",
+        ".content img",
+      ],
     }
   );
+}
+
+export function resolveImageUrl(
+  value: string | null | undefined,
+  baseUrl: string,
+): string {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  if (trimmed.startsWith("/")) {
+    try {
+      return new URL(trimmed, baseUrl).toString();
+    } catch {
+      return "";
+    }
+  }
+  try {
+    return new URL(trimmed, baseUrl).toString();
+  } catch {
+    return "";
+  }
 }
 
 function isJunkParagraph(text: string): boolean {
@@ -480,7 +540,7 @@ function isJunkParagraph(text: string): boolean {
 }
 
 
-function extractPageData(
+export function extractPageData(
   html: string,
   fallback: { title: string; snippet: string; source: string; link: string },
 ) {
@@ -636,10 +696,55 @@ function extractPageData(
         `This story was originally published by ${fallback.source}. The source link is included below for direct review and additional context.`,
       ];
 
+  const structuredImageValue =
+    typeof structuredData?.image === "string"
+      ? structuredData.image
+      : Array.isArray(structuredData?.image)
+        ? (typeof structuredData.image[0] === "string"
+            ? structuredData.image[0]
+            : (structuredData.image[0] as Record<string, unknown>)?.url ?? "")
+        : typeof structuredData?.image === "object" && structuredData.image !== null
+          ? ((structuredData.image as Record<string, unknown>).url ??
+             (structuredData.image as Record<string, unknown>).contentUrl ??
+             "")
+          : "";
+
+  const imageUrlFromSelectors = siteRules.image
+    ?.flatMap((selector) => {
+      const node = $(selector).first();
+      if (node.length === 0) return [];
+      const rawSrc =
+        node.attr("content") ||
+        node.attr("src") ||
+        node.attr("data-src") ||
+        node.attr("data-original") ||
+        node.attr("data-lazy-src") ||
+        "";
+      const resolved = resolveImageUrl(rawSrc, fallback.link);
+      return resolved ? [resolved] : [];
+    })
+    .find(Boolean);
+
+  const candidateImageUrl =
+    (typeof structuredImageValue === "string"
+      ? resolveImageUrl(structuredImageValue, fallback.link)
+      : "") ||
+    imageUrlFromSelectors ||
+    resolveImageUrl($('meta[property="og:image"]').attr("content"), fallback.link) ||
+    resolveImageUrl($('meta[name="twitter:image"]').attr("content"), fallback.link) ||
+    resolveImageUrl(
+      candidateRoot.find("img").first().attr("src") ||
+      candidateRoot.find("img").first().attr("data-src"),
+      fallback.link,
+    ) ||
+    resolveImageUrl($("img").first().attr("src"), fallback.link) ||
+    "";
+
   return {
     title,
     excerpt,
     body,
+    imageUrl: candidateImageUrl,
     publishedAt,
   };
 }
@@ -1141,6 +1246,8 @@ export async function runNewsFetch() {
 
   const selectedCandidates = unique.slice(0, 8);
   const processedPayload: Array<any> = [];
+  let directImagesCount = 0;
+  let stockImagesCount = 0;
 
   for (const entry of selectedCandidates) {
     if (!hasTimeRemaining(25_000)) {
@@ -1162,6 +1269,7 @@ export async function runNewsFetch() {
           title: fallbackTitle,
           excerpt: entry.snippet,
           body: [entry.snippet],
+          imageUrl: "",
           publishedAt: new Date().toISOString(),
         };
 
@@ -1254,11 +1362,49 @@ export async function runNewsFetch() {
         "ne",
       );
 
-      const searchKeywords = extractSearchKeywords(
-        titleEn || rawTitle,
-        sourceCategory,
-      );
-      const stockImage = await fetchStockImage(searchKeywords, sourceCategory);
+      const candidateImage = pageData.imageUrl;
+      const quality = candidateImage
+        ? await checkImageQuality(candidateImage)
+        : { isUsable: false, reason: "no candidate image found in source" };
+
+      let finalImage: {
+        imageUrl: string;
+        imageAlt: string;
+        imageCredit: string;
+        imageCreditUrl?: string;
+        imageSource: "direct" | "stock";
+      };
+
+      if (quality.isUsable && candidateImage) {
+        directImagesCount++;
+        console.log(
+          `[Image Decision: DIRECT] Using publisher source image (${quality.width}x${quality.height}, ${quality.contentType}) for: "${entry.title}"`,
+        );
+        finalImage = {
+          imageUrl: candidateImage,
+          imageAlt: `${titleEn || titleNe} — image via ${entry.source}`,
+          imageCredit: entry.source,
+          imageCreditUrl: entry.link,
+          imageSource: "direct",
+        };
+      } else {
+        stockImagesCount++;
+        console.log(
+          `[Image Decision: STOCK] Source image rejected (${quality.reason}), falling back to stock photo for: "${entry.title}"`,
+        );
+        const searchKeywords = extractSearchKeywords(
+          titleEn || rawTitle,
+          sourceCategory,
+        );
+        const stockImage = await fetchStockImage(searchKeywords, sourceCategory);
+        finalImage = {
+          imageUrl: stockImage.imageUrl,
+          imageAlt: stockImage.imageAlt || `${titleEn || titleNe} image`,
+          imageCredit: stockImage.imageCredit,
+          imageCreditUrl: stockImage.imageCreditUrl,
+          imageSource: "stock",
+        };
+      }
 
       processedPayload.push({
         slugEn: `${slug}-en-${timestamp}`,
@@ -1274,10 +1420,10 @@ export async function runNewsFetch() {
         sourceUrl: entry.link,
         sourceHeadline: rawTitle,
         contentHash: contentHash(entry.title),
-        imageUrl: stockImage.imageUrl,
-        imageAlt: stockImage.imageAlt || `${titleEn || titleNe} image`,
-        imageCredit: stockImage.imageCredit,
-        imageCreditUrl: stockImage.imageCreditUrl,
+        imageUrl: finalImage.imageUrl,
+        imageAlt: finalImage.imageAlt,
+        imageCredit: finalImage.imageCredit,
+        imageCreditUrl: finalImage.imageCreditUrl,
         sourceName: entry.source,
         publishedAt: new Date(pageData.publishedAt),
         status: "published",
@@ -1322,6 +1468,15 @@ export async function runNewsFetch() {
 
   console.log(
     `Fetched ${entries.length} candidate entries; published ${payload.length} new stories.`,
+  );
+
+  console.log(
+    `\n================ Image Source Summary ================\n` +
+    `Articles published: ${payload.length}\n` +
+    `Direct publisher source images: ${directImagesCount}\n` +
+    `Stock fallback photos: ${stockImagesCount}\n` +
+    `Direct source ratio: ${payload.length > 0 ? ((directImagesCount / payload.length) * 100).toFixed(1) : "0"}%\n` +
+    `======================================================\n`,
   );
 
   return result;
