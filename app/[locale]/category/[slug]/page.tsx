@@ -7,7 +7,7 @@ import { NewsletterBox } from "@/components/article/NewsletterBox";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
-import { getArticlesByCategory, getCategories, getLatestArticles } from "@/lib/news-data";
+import { getCategories, getCategoryFeed, getLatestArticles } from "@/lib/news-data";
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Locale } from "@/lib/site";
 import type { Metadata } from "next";
@@ -81,7 +81,7 @@ export default async function CategoryPage({
 
   const [categoriesList, items, latestStories] = await Promise.all([
     getCategories(),
-    getArticlesByCategory(slug),
+    getCategoryFeed(slug),
     getLatestArticles(5),
   ]);
 

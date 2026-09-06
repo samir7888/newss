@@ -1,4 +1,5 @@
 import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { articles, categories } from "@/lib/db/schema";
 import { categories as fallbackCategories } from "@/lib/site";
@@ -24,6 +25,9 @@ export type NewsArticle = {
   likesCount: number;
 };
 
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80";
+
 function toParagraphs(value: string | null | undefined) {
   if (!value) return ["Latest Nepal news update."];
 
@@ -33,7 +37,7 @@ function toParagraphs(value: string | null | undefined) {
     .filter(Boolean);
 }
 
-function toArticleRecord(row: {
+type FeedRow = {
   id: number;
   slugEn: string;
   slugNe: string;
@@ -41,18 +45,58 @@ function toArticleRecord(row: {
   titleNe: string;
   excerptEn: string;
   excerptNe: string;
-  bodyEn: string;
-  bodyNe: string;
   imageUrl: string;
   imageAlt: string;
-  imageCredit?: string | null;
-  imageCreditUrl?: string | null;
   publishedAt: Date | string | null;
-  sourceHeadline: string;
-  sourceUrl: string;
   categorySlug: string | null;
+};
+
+type DetailRow = FeedRow & {
+  bodyEn: string;
+  bodyNe: string;
+  imageCredit: string | null;
+  imageCreditUrl: string | null;
   likesCount: number | null;
-}): NewsArticle {
+};
+
+function toFeedArticle(row: FeedRow): NewsArticle {
+  return {
+    id: row.id,
+    slug: row.slugEn,
+    slugEn: row.slugEn,
+    slugNe: row.slugNe,
+    title: {
+      ne: row.titleNe,
+      en: row.titleEn,
+    },
+    excerpt: {
+      ne: row.excerptNe,
+      en: row.excerptEn,
+    },
+    body: {
+      ne: [],
+      en: [],
+    },
+    bodyHtml: {
+      ne: "",
+      en: "",
+    },
+    category: row.categorySlug || "general",
+    image: row.imageUrl || FALLBACK_IMAGE,
+    imageAlt: {
+      ne: row.titleNe,
+      en: row.titleEn,
+    },
+    publishedAt: row.publishedAt
+      ? new Date(row.publishedAt).toISOString()
+      : new Date().toISOString(),
+    source: "Nepali Samachar",
+    sourceUrl: "/",
+    likesCount: 0,
+  };
+}
+
+function toArticleRecord(row: DetailRow): NewsArticle {
   return {
     id: row.id,
     slug: row.slugEn,
@@ -77,9 +121,7 @@ function toArticleRecord(row: {
       en: row.bodyEn.includes("<p") ? row.bodyEn : toRichHtml(row.bodyEn),
     },
     category: row.categorySlug || "general",
-    image:
-      row.imageUrl ||
-      "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80",
+    image: row.imageUrl || FALLBACK_IMAGE,
     imageAlt: {
       ne: row.titleNe,
       en: row.titleEn,
@@ -95,7 +137,7 @@ function toArticleRecord(row: {
   };
 }
 
-const articleFields = {
+const feedFields = {
   id: articles.id,
   slugEn: articles.slugEn,
   slugNe: articles.slugNe,
@@ -103,16 +145,18 @@ const articleFields = {
   titleNe: articles.titleNe,
   excerptEn: articles.excerptEn,
   excerptNe: articles.excerptNe,
-  bodyEn: articles.bodyEn,
-  bodyNe: articles.bodyNe,
   imageUrl: articles.imageUrl,
   imageAlt: articles.imageAlt,
+  publishedAt: articles.publishedAt,
+  categorySlug: categories.slug,
+};
+
+const detailFields = {
+  ...feedFields,
+  bodyEn: articles.bodyEn,
+  bodyNe: articles.bodyNe,
   imageCredit: articles.imageCredit,
   imageCreditUrl: articles.imageCreditUrl,
-  publishedAt: articles.publishedAt,
-  sourceHeadline: articles.sourceHeadline,
-  sourceUrl: articles.sourceUrl,
-  categorySlug: categories.slug,
   likesCount: articles.likesCount,
 };
 
@@ -161,45 +205,61 @@ export async function getAllArticleSlugs(limit = 60) {
   }, []);
 }
 
-export async function getLatestArticles(limit = 9) {
+async function fetchLatestArticles(limit = 9) {
   return await withFallback(async () => {
     const rows = await db
-      .select(articleFields)
+      .select(feedFields)
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .where(eq(articles.status, "published"))
       .orderBy(desc(articles.publishedAt))
       .limit(limit);
 
-    return rows.map((row) => toArticleRecord(row as any));
+    return rows.map((row) => toFeedArticle(row as FeedRow));
   }, []);
 }
 
-export async function getArticleBySlug(locale: "ne" | "en", slug: string) {
+export async function getLatestArticles(limit = 9) {
+  return fetchLatestArticles(limit);
+}
+
+export const getHomepageFeed = unstable_cache(
+  () => fetchLatestArticles(24),
+  ["homepage-feed"],
+  { revalidate: 1800, tags: ["articles", "homepage"] },
+);
+
+async function fetchArticleBySlug(locale: "ne" | "en", slug: string) {
   return await withFallback(async () => {
     const rows =
       locale === "ne"
         ? await db
-          .select(articleFields)
+          .select(detailFields)
           .from(articles)
           .leftJoin(categories, eq(articles.categoryId, categories.id))
           .where(eq(articles.slugNe, slug))
           .limit(1)
         : await db
-          .select(articleFields)
+          .select(detailFields)
           .from(articles)
           .leftJoin(categories, eq(articles.categoryId, categories.id))
           .where(eq(articles.slugEn, slug))
           .limit(1);
 
-    return rows[0] ? toArticleRecord(rows[0] as any) : null;
+    return rows[0] ? toArticleRecord(rows[0] as DetailRow) : null;
   }, null);
 }
+
+export const getArticleBySlug = unstable_cache(
+  (locale: "ne" | "en", slug: string) => fetchArticleBySlug(locale, slug),
+  ["article-detail"],
+  { revalidate: 21600, tags: ["article-detail"] },
+);
 
 export async function getArticlesByCategory(categorySlug: string, limit = 30) {
   return await withFallback(async () => {
     const rows = await db
-      .select(articleFields)
+      .select(feedFields)
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .where(
@@ -211,9 +271,15 @@ export async function getArticlesByCategory(categorySlug: string, limit = 30) {
       .orderBy(desc(articles.publishedAt))
       .limit(limit);
 
-    return rows.map((row) => toArticleRecord(row as any));
+    return rows.map((row) => toFeedArticle(row as FeedRow));
   }, []);
 }
+
+export const getCategoryFeed = unstable_cache(
+  (categorySlug: string) => getArticlesByCategory(categorySlug, 30),
+  ["category-feed"],
+  { revalidate: 1800, tags: ["articles", "categories"] },
+);
 
 export async function getRelatedArticles(
   categorySlug: string,
@@ -222,7 +288,7 @@ export async function getRelatedArticles(
 ) {
   return await withFallback(async () => {
     const rows = await db
-      .select(articleFields)
+      .select(feedFields)
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .where(eq(categories.slug, categorySlug))
@@ -232,7 +298,7 @@ export async function getRelatedArticles(
     return rows
       .filter((row) => row.id !== articleId)
       .slice(0, limit)
-      .map((row) => toArticleRecord(row as any));
+      .map((row) => toFeedArticle(row as FeedRow));
   }, []);
 }
 
@@ -245,7 +311,7 @@ export async function searchArticles(query: string) {
   return await withFallback(async () => {
     const pattern = `%${normalized}%`;
     const rows = await db
-      .select(articleFields)
+      .select(feedFields)
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .where(
@@ -259,6 +325,6 @@ export async function searchArticles(query: string) {
       .orderBy(desc(articles.publishedAt))
       .limit(12);
 
-    return rows.map((row) => toArticleRecord(row as any));
+    return rows.map((row) => toFeedArticle(row as FeedRow));
   }, []);
 }

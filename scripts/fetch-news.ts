@@ -1151,7 +1151,8 @@ async function triggerOnDemandRevalidation(
     return;
   }
 
-  const paths = new Set<string>(["/", "/en"]);
+  const paths = new Set<string>(["/", "/en", "/sitemap.xml"]);
+  const tags = new Set<string>(["articles"]);
 
   for (const article of newArticles) {
     if (article.slugNe) paths.add(`/ne/article/${article.slugNe}`);
@@ -1159,13 +1160,14 @@ async function triggerOnDemandRevalidation(
     if (article.category) {
       paths.add(`/ne/category/${article.category}`);
       paths.add(`/en/category/${article.category}`);
+      tags.add(`category-${article.category}`);
     }
   }
 
   try {
     const url = new URL("/api/revalidate", siteUrl).toString();
     console.log(
-      `Triggering on-demand revalidation for ${paths.size} paths at ${url}...`,
+      `Triggering on-demand revalidation for ${paths.size} paths and ${tags.size} tags at ${url}...`,
     );
 
     const response = await fetch(url, {
@@ -1174,7 +1176,10 @@ async function triggerOnDemandRevalidation(
         "Content-Type": "application/json",
         "x-revalidate-secret": secret,
       },
-      body: JSON.stringify({ paths: Array.from(paths) }),
+      body: JSON.stringify({
+        paths: Array.from(paths),
+        tags: Array.from(tags),
+      }),
     });
 
     if (response.ok) {
@@ -1244,7 +1249,7 @@ export async function runNewsFetch() {
     }
   }
 
-  const selectedCandidates = unique.slice(0, 8);
+  const selectedCandidates = unique.slice(0, 4);
   const processedPayload: Array<any> = [];
   let directImagesCount = 0;
   let stockImagesCount = 0;

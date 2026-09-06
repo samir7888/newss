@@ -8,7 +8,7 @@ import { NewsletterBox } from "@/components/article/NewsletterBox";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
-import { getCategories, getLatestArticles } from "@/lib/news-data";
+import { getCategories, getHomepageFeed } from "@/lib/news-data";
 import { formatRelativeTime } from "@/lib/format-date";
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Metadata } from "next";
@@ -54,7 +54,7 @@ export default async function LocaleHomePage({
   }
 
   const [articles, categoriesList] = await Promise.all([
-    getLatestArticles(24),
+    getHomepageFeed(),
     getCategories(),
   ]);
 
