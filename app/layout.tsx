@@ -139,6 +139,11 @@ export default function RootLayout({
             __html: `(function(s){s.dataset.zone='11766046',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
           }}
         />
+        <Script
+          src="https://quge5.com/88/tag.min.js"
+          data-zone="278495"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="min-h-full bg-[#FAFAF8] text-slate-900 font-sans">
         {children}
