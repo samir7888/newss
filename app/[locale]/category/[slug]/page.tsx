@@ -213,8 +213,10 @@ export default async function CategoryPage({
               </div>
             </div>
 
-            {/* Sidebar ad slot */}
-            <AdSlot variant="sidebar" locale={resolvedLocale} />
+            {/* Sidebar ad slot — desktop only (fixed 300×250 doesn't fit narrow mobile) */}
+            <div className="hidden lg:block">
+              <AdSlot variant="sidebar" locale={resolvedLocale} />
+            </div>
 
             {/* Latest across all news */}
             <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">

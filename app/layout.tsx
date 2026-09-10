@@ -125,6 +125,19 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
+        {/* Monetag site verification — registers the service worker at /monetag.js */}
+        <Script
+          id="monetag-sw"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/monetag.js', { scope: '/' })
+                  .catch(function() {});
+              }
+            `,
+          }}
+        />
       </head>
       <body className="min-h-full bg-[#FAFAF8] text-slate-900 font-sans">
         {children}

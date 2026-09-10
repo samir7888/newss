@@ -278,8 +278,8 @@ export default async function LocaleHomePage({
                     locale={resolvedLocale}
                     layout="list-row"
                   />
-                  {/* Insert native ad every 5th item per SKILL.md §2 & §5 */}
-                  {(index + 1) % 5 === 0 && index !== feedStories.length - 1 && (
+                  {/* Insert native ad every 6th item per SKILL.md §2 & §5 */}
+                  {(index + 1) % 6 === 0 && index !== feedStories.length - 1 && (
                     <AdSlot
                       variant="in-feed"
                       locale={resolvedLocale}
@@ -320,8 +320,10 @@ export default async function LocaleHomePage({
               </div>
             </div>
 
-            {/* 3. Sidebar Ad Unit (300x250 with reserved height) */}
-            <AdSlot variant="sidebar" locale={resolvedLocale} />
+            {/* 3. Sidebar Ad Unit (300x250 with reserved height) — desktop only */}
+            <div className="hidden lg:block">
+              <AdSlot variant="sidebar" locale={resolvedLocale} />
+            </div>
 
             {/* 4. Category Quick Explore */}
             <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
