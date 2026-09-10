@@ -12,6 +12,10 @@ export const metadata: Metadata = {
       "x-default": "/",
     },
   },
+  // Monetag site verification — explicitly on the bare "/" route
+  other: {
+    monetag: "f6720141114fecac57fb496abcd38a14",
+  },
 };
 
 export default async function Home() {

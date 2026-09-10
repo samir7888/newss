@@ -82,6 +82,11 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
+  // Monetag site verification — server-rendered into <head> on EVERY route
+  // (including bare "/" which is served by app/page.tsx independently)
+  other: {
+    monetag: "f6720141114fecac57fb496abcd38a14",
+  },
 };
 
 const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
@@ -125,12 +130,6 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
-        {/* Monetag site verification — registers the service worker at /monetag.js */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var m=document.createElement('meta');m.name='monetag';m.content='f6720141114fecac57fb496abcd38a14';document.head.appendChild(m);})()`,
-          }}
-        />
       </head>
       <body className="min-h-full bg-[#FAFAF8] text-slate-900 font-sans">
         {children}
