@@ -130,6 +130,15 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
+
+        
+        <Script
+          id="monetag-banner"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(s){s.dataset.zone='11766046',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
+          }}
+        />
       </head>
       <body className="min-h-full bg-[#FAFAF8] text-slate-900 font-sans">
         {children}
