@@ -10,6 +10,20 @@ function getSpeechSynthesisAvailable() {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
+function stripHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;|&apos;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 interface ArticleToolbarProps {
   slug: string;
   title: string;
@@ -137,7 +151,7 @@ export function ArticleToolbar({
       return;
     }
 
-    const textToRead = `${title}. ${bodyText}`.replace(/\s+/g, " ").trim().slice(0, 5000);
+    const textToRead = stripHtml(`${title}. ${bodyText}`).slice(0, 5000);
     if (!textToRead) return;
 
     setIsSpeakingLoading(true);
@@ -260,12 +274,12 @@ export function ArticleToolbar({
             {isSpeaking ? (
               <>
                 <VolumeX className="h-3.5 w-3.5 text-red-700" />
-                <span>{t("रोक्नुहोस्", "Stop")}</span>
+                <span className="hidden sm:inline">{t("रोक्नुहोस्", "Stop")}</span>
               </>
             ) : (
               <>
                 <Volume2 className="h-3.5 w-3.5 text-slate-500" />
-                <span>{t("सुन्नुहोस्", "Listen")}</span>
+                <span className="hidden sm:inline">{t("सुन्नुहोस्", "Listen")}</span>
               </>
             )}
           </button>
