@@ -115,14 +115,10 @@ export function AdSlot({
     // Guard: don't double-inject if already present (React Strict Mode / HMR)
     if (container.querySelector("script[data-monetag-zone]")) return;
 
-    // Monetag's standard async script tag for Banner / Native Banner zones.
-    // The script host and zone ID come from your Monetag dashboard snippet.
-    // Format: https://<host>/zone/<zoneId>.js
-    // If your zone snippet uses a different URL pattern, update MONETAG_SCRIPT_HOST.
+    // Monetag script: uses data-zone attribute and tag.min.js
     const script = document.createElement("script");
-    script.src = `https://${MONETAG_SCRIPT_HOST}/zone/${monetagZoneId}.js`;
-    script.async = true;
-    script.dataset.monetagZone = monetagZoneId;
+    script.dataset.zone = monetagZoneId;
+    script.src = `https://${MONETAG_SCRIPT_HOST}/tag.min.js`;
     container.appendChild(script);
 
     return () => {
