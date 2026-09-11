@@ -30,8 +30,7 @@ const MONETAG_ZONE_TYPE: Record<AdVariant, MonetagZoneType> = {
 // Monetag — fill these after creating zones in https://monetag.com dashboard.
 // Only "Native Banner" and "Banner" zone types are supported here.
 // Do NOT use Popunder / Interstitial / Vignette / SmartLink zones.
-const MONETAG_NATIVE_ZONE_ID =
-  process.env.NEXT_PUBLIC_MONETAG_NATIVE_ZONE_ID ?? "";
+const MONETAG_NATIVE_ZONE_ID = 11772604
 const MONETAG_BANNER_ZONE_ID =
   process.env.NEXT_PUBLIC_MONETAG_BANNER_ZONE_ID ?? "";
 const MONETAG_SCRIPT_HOST =
@@ -117,8 +116,8 @@ export function AdSlot({
 
     // Monetag script: uses data-zone attribute and tag.min.js
     const script = document.createElement("script");
-    script.dataset.zone = monetagZoneId;
-    script.src = `https://${MONETAG_SCRIPT_HOST}/tag.min.js`;
+    script.dataset.zone = String(monetagZoneId);
+    script.src = `https://n6wxm.com/vignette.min.js`;
     container.appendChild(script);
 
     return () => {
