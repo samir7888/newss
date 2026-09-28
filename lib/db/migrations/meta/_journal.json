@@ -15,6 +15,13 @@
       "when": 1788371437443,
       "tag": "0001_add_likes_count",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790605977371,
+      "tag": "0002_soft_sersi",
+      "breakpoints": true
     }
   ]
 }
