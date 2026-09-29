@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { categories } from "@/lib/site";
+import { getAllArticleSlugs } from "@/lib/news-data";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -112,7 +113,24 @@ export async function GET() {
     },
   ]);
 
-  const allUrls = [...staticRoutes, ...categoryRoutes];
+  // Get recent articles (limit to avoid too large sitemap)
+  const articleSlugs = await getAllArticleSlugs(500);
+  const articleRoutes = articleSlugs.flatMap((article) => [
+    {
+      url: `${origin}/ne/article/${article.slugNe}`,
+      lastModified: new Date(article.publishedAt || new Date()).toISOString(),
+      changeFrequency: "daily",
+      priority: "0.8",
+    },
+    {
+      url: `${origin}/en/article/${article.slugEn}`,
+      lastModified: new Date(article.publishedAt || new Date()).toISOString(),
+      changeFrequency: "daily",
+      priority: "0.8",
+    },
+  ]);
+
+  const allUrls = [...staticRoutes, ...categoryRoutes, ...articleRoutes];
 
   const urls = allUrls
     .map(
