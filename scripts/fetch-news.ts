@@ -55,7 +55,6 @@ const defaultFeeds = [
   //   category: "politics",
   // },
 
-
   {
     name: "Ratopati",
     url: process.env.FEED_URL_3 || "https://www.ratopati.com/feed",
@@ -113,7 +112,6 @@ const defaultFeeds = [
     category: "culture",
   },
 
-
   {
     name: "Annapurna Post",
     url: process.env.FEED_URL_15 || "https://annapurnapost.com/feed/",
@@ -146,7 +144,8 @@ const defaultFeeds = [
   },
   {
     name: "Sports Jana Aastha",
-    url: process.env.FEED_URL_21 || "https://www.sportsjanaasthaepaper.com/feed/",
+    url:
+      process.env.FEED_URL_21 || "https://www.sportsjanaasthaepaper.com/feed/",
     category: "sports",
   },
 ];
@@ -176,7 +175,7 @@ async function readPublishedCache() {
 }
 
 async function writePublishedCache(
-  entries: Array<{ title: string; hash: string; sourceUrl: string }>,
+  entries: Array<{ title: string; hash: string; sourceUrl: string }>
 ) {
   await ensureCacheDir();
   await writeFile(cacheFilePath, JSON.stringify(entries, null, 2));
@@ -255,7 +254,10 @@ export function cleanText(value: string | null | undefined) {
     .trim();
 }
 
-async function fetchHtml(url: string, timeoutMs = 5000): Promise<string | null> {
+async function fetchHtml(
+  url: string,
+  timeoutMs = 5000
+): Promise<string | null> {
   try {
     const cleanUrl = (url ?? "").trim();
     if (!cleanUrl || !cleanUrl.startsWith("http")) return null;
@@ -375,8 +377,18 @@ function getSourceSelectors(url: string) {
     "thehimalayantimes.com": {
       title: ["h1.article-title", "h1", ".headline"],
       description: ["meta[name='description']", ".sub-title", ".lead"],
-      body: ["article p", ".article-body p", ".story-content p", ".content p", ".post-content p"],
-      image: ["meta[property='og:image']", "article img", ".featured-image img"],
+      body: [
+        "article p",
+        ".article-body p",
+        ".story-content p",
+        ".content p",
+        ".post-content p",
+      ],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".featured-image img",
+      ],
     },
     "kathmandutribune.com": {
       title: ["h1", ".entry-title", ".headline"],
@@ -388,7 +400,11 @@ function getSourceSelectors(url: string) {
       title: ["h1", ".entry-title"],
       description: ["meta[name='description']", ".excerpt"],
       body: ["article p", ".entry-content p", ".post-content p", ".content p"],
-      image: ["meta[property='og:image']", "article img", ".featured-image img"],
+      image: [
+        "meta[property='og:image']",
+        "article img",
+        ".featured-image img",
+      ],
     },
     "rajdhanidaily.com": {
       title: ["h1", ".news-title"],
@@ -411,23 +427,34 @@ function getSourceSelectors(url: string) {
     "ekantipur.com": {
       title: ["h1", ".article-title", ".news-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
-      body: ["article p", ".content p", ".article-content p", ".post-content p"],
-      image: [
-        "meta[property='og:image']",
-        "article img",
-        ".article-image img",
+      body: [
+        "article p",
+        ".content p",
+        ".article-content p",
+        ".post-content p",
       ],
+      image: ["meta[property='og:image']", "article img", ".article-image img"],
     },
     "kantipurdaily.com": {
       title: ["h1", ".article-title", ".news-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
-      body: ["article p", ".content p", ".article-content p", ".post-content p"],
+      body: [
+        "article p",
+        ".content p",
+        ".article-content p",
+        ".post-content p",
+      ],
       image: ["meta[property='og:image']", "article img"],
     },
     "annapurnapost.com": {
       title: ["h1", ".article-title", ".post-title"],
       description: ["meta[name='description']", ".lead", ".summary"],
-      body: ["article p", ".article-content p", ".entry-content p", ".content p"],
+      body: [
+        "article p",
+        ".article-content p",
+        ".entry-content p",
+        ".content p",
+      ],
       image: [
         "meta[property='og:image']",
         "article img",
@@ -486,7 +513,7 @@ function getSourceSelectors(url: string) {
 
 export function resolveImageUrl(
   value: string | null | undefined,
-  baseUrl: string,
+  baseUrl: string
 ): string {
   if (!value) return "";
   const trimmed = value.trim();
@@ -539,21 +566,20 @@ function isJunkParagraph(text: string): boolean {
   return junkPatterns.some((pattern) => pattern.test(trimmed));
 }
 
-
 export function extractPageData(
   html: string,
-  fallback: { title: string; snippet: string; source: string; link: string },
+  fallback: { title: string; snippet: string; source: string; link: string }
 ) {
   const $ = load(html);
 
   // Remove noise elements
   $(
-    "script, style, noscript, svg, form, iframe, header, footer, nav, aside, .advertisement, .ads, .social-share, .share-box, .fb-comments, .comments, .related-posts, .related-news, .recommended, .sidebar, .tags, .author-bio",
+    "script, style, noscript, svg, form, iframe, header, footer, nav, aside, .advertisement, .ads, .social-share, .share-box, .fb-comments, .comments, .related-posts, .related-news, .recommended, .sidebar, .tags, .author-bio"
   ).remove();
 
   const siteRules = getSourceSelectors(fallback.link);
   const candidateRoot = $(
-    "article, main, .article-content, .entry-content, .post-content, .story-content, .news-content, .detail-content",
+    "article, main, .article-content, .entry-content, .post-content, .story-content, .news-content, .detail-content"
   ).first();
 
   const structuredBlocks = $('script[type="application/ld+json"]').toArray();
@@ -588,22 +614,22 @@ export function extractPageData(
     typeof structuredData?.headline === "string"
       ? structuredData.headline
       : typeof structuredData?.name === "string"
-        ? structuredData.name
-        : "";
+      ? structuredData.name
+      : "";
 
   const structuredDescription =
     typeof structuredData?.description === "string"
       ? structuredData.description
       : typeof structuredData?.abstract === "string"
-        ? structuredData.abstract
-        : "";
+      ? structuredData.abstract
+      : "";
 
   const structuredBodySource =
     typeof structuredData?.articleBody === "string"
       ? structuredData.articleBody
       : Array.isArray(structuredData?.articleBody)
-        ? structuredData.articleBody.join("\n\n")
-        : "";
+      ? structuredData.articleBody.join("\n\n")
+      : "";
 
   const paragraphs = (() => {
     const extracted: string[] = [];
@@ -641,7 +667,7 @@ export function extractPageData(
     }
 
     return extracted.filter(
-      (paragraph) => paragraph.length > 20 && !isJunkParagraph(paragraph),
+      (paragraph) => paragraph.length > 20 && !isJunkParagraph(paragraph)
     );
   })();
 
@@ -660,54 +686,55 @@ export function extractPageData(
 
   const title = cleanText(
     structuredHeadline ||
-    titleFromSelectors ||
-    $('meta[property="og:title"]').attr("content") ||
-    $('meta[name="twitter:title"]').attr("content") ||
-    $('meta[name="title"]').attr("content") ||
-    candidateRoot.find("h1").first().text() ||
-    $("h1").first().text() ||
-    fallback.title,
+      titleFromSelectors ||
+      $('meta[property="og:title"]').attr("content") ||
+      $('meta[name="twitter:title"]').attr("content") ||
+      $('meta[name="title"]').attr("content") ||
+      candidateRoot.find("h1").first().text() ||
+      $("h1").first().text() ||
+      fallback.title
   );
 
   const excerpt = cleanText(
     structuredDescription ||
-    descriptionFromSelectors ||
-    $('meta[name="description"]').attr("content") ||
-    $('meta[property="og:description"]').attr("content") ||
-    paragraphs[0] ||
-    candidateRoot.find("p").first().text() ||
-    $("p").first().text() ||
-    fallback.snippet,
+      descriptionFromSelectors ||
+      $('meta[name="description"]').attr("content") ||
+      $('meta[property="og:description"]').attr("content") ||
+      paragraphs[0] ||
+      candidateRoot.find("p").first().text() ||
+      $("p").first().text() ||
+      fallback.snippet
   ).slice(0, 260);
 
   const publishedAt =
     typeof structuredData?.datePublished === "string"
       ? structuredData.datePublished
       : $('meta[property="article:published_time"]').attr("content") ||
-      $('meta[name="pubdate"]').attr("content") ||
-      $("time").first().attr("datetime") ||
-      new Date().toISOString();
+        $('meta[name="pubdate"]').attr("content") ||
+        $("time").first().attr("datetime") ||
+        new Date().toISOString();
 
   const body =
     paragraphs.length > 0
       ? paragraphs
       : [
-        excerpt || fallback.snippet,
-        `This story was originally published by ${fallback.source}. The source link is included below for direct review and additional context.`,
-      ];
+          excerpt || fallback.snippet,
+          `This story was originally published by ${fallback.source}. The source link is included below for direct review and additional context.`,
+        ];
 
   const structuredImageValue =
     typeof structuredData?.image === "string"
       ? structuredData.image
       : Array.isArray(structuredData?.image)
-        ? (typeof structuredData.image[0] === "string"
-            ? structuredData.image[0]
-            : (structuredData.image[0] as Record<string, unknown>)?.url ?? "")
-        : typeof structuredData?.image === "object" && structuredData.image !== null
-          ? ((structuredData.image as Record<string, unknown>).url ??
-             (structuredData.image as Record<string, unknown>).contentUrl ??
-             "")
-          : "";
+      ? typeof structuredData.image[0] === "string"
+        ? structuredData.image[0]
+        : (structuredData.image[0] as Record<string, unknown>)?.url ?? ""
+      : typeof structuredData?.image === "object" &&
+        structuredData.image !== null
+      ? (structuredData.image as Record<string, unknown>).url ??
+        (structuredData.image as Record<string, unknown>).contentUrl ??
+        ""
+      : "";
 
   const imageUrlFromSelectors = siteRules.image
     ?.flatMap((selector) => {
@@ -730,12 +757,18 @@ export function extractPageData(
       ? resolveImageUrl(structuredImageValue, fallback.link)
       : "") ||
     imageUrlFromSelectors ||
-    resolveImageUrl($('meta[property="og:image"]').attr("content"), fallback.link) ||
-    resolveImageUrl($('meta[name="twitter:image"]').attr("content"), fallback.link) ||
+    resolveImageUrl(
+      $('meta[property="og:image"]').attr("content"),
+      fallback.link
+    ) ||
+    resolveImageUrl(
+      $('meta[name="twitter:image"]').attr("content"),
+      fallback.link
+    ) ||
     resolveImageUrl(
       candidateRoot.find("img").first().attr("src") ||
-      candidateRoot.find("img").first().attr("data-src"),
-      fallback.link,
+        candidateRoot.find("img").first().attr("data-src"),
+      fallback.link
     ) ||
     resolveImageUrl($("img").first().attr("src"), fallback.link) ||
     "";
@@ -749,7 +782,9 @@ export function extractPageData(
   };
 }
 
-export function isInvalidTranslationText(text: string | null | undefined): boolean {
+export function isInvalidTranslationText(
+  text: string | null | undefined
+): boolean {
   if (!text || typeof text !== "string") return true;
   const lower = text.toLowerCase();
   return (
@@ -775,13 +810,18 @@ const translationCache = new Map<string, string>();
 export async function translateSingle(
   value: string,
   target: "en" | "ne",
-  timeoutMs = 3000,
+  timeoutMs = 3000
 ): Promise<string> {
   const trimmed = value.trim();
   if (!trimmed) return "";
 
   if (target === "ne" && hasDevanagari(trimmed)) return trimmed;
-  if (target === "en" && !hasDevanagari(trimmed) && !isInvalidTranslationText(trimmed)) return trimmed;
+  if (
+    target === "en" &&
+    !hasDevanagari(trimmed) &&
+    !isInvalidTranslationText(trimmed)
+  )
+    return trimmed;
 
   const cacheKey = `${target}:${trimmed}`;
   if (translationCache.has(cacheKey)) {
@@ -793,7 +833,9 @@ export async function translateSingle(
   for (let attempt = 0; attempt < 2; attempt++) {
     // 1. Google Translate GTX
     try {
-      const url = new URL("https://translate.googleapis.com/translate_a/single");
+      const url = new URL(
+        "https://translate.googleapis.com/translate_a/single"
+      );
       url.searchParams.set("client", "gtx");
       url.searchParams.set("sl", source);
       url.searchParams.set("tl", target);
@@ -809,7 +851,9 @@ export async function translateSingle(
         },
         signal: controller.signal,
       });
-      const data = response.ok ? ((await response.json()) as Array<Array<[string]>>) : null;
+      const data = response.ok
+        ? ((await response.json()) as Array<Array<[string]>>)
+        : null;
       clearTimeout(timeoutId);
 
       if (data && Array.isArray(data[0])) {
@@ -849,7 +893,11 @@ export async function translateSingle(
       clearTimeout(timeoutId);
 
       if (dictResult) {
-        const translated = Array.isArray(dictResult) ? dictResult[0] : typeof dictResult === "string" ? dictResult : "";
+        const translated = Array.isArray(dictResult)
+          ? dictResult[0]
+          : typeof dictResult === "string"
+          ? dictResult
+          : "";
         if (
           translated &&
           !isInvalidTranslationText(translated) &&
@@ -876,9 +924,9 @@ export async function translateSingle(
       });
       const fbResult = fbResponse.ok
         ? ((await fbResponse.json()) as {
-          responseData?: { translatedText?: string };
-          responseStatus?: number;
-        })
+            responseData?: { translatedText?: string };
+            responseStatus?: number;
+          })
         : null;
       clearTimeout(timeoutId);
 
@@ -909,11 +957,11 @@ export async function translateSingle(
 
 export async function translateParagraphList(
   paragraphs: string[],
-  target: "en" | "ne",
+  target: "en" | "ne"
 ): Promise<string[]> {
   const validParagraphs = paragraphs
     .map((p) => cleanText(p))
-    .filter((p) => p.length > 0 && !isInvalidTranslationText(p))
+    .filter((p) => p.length > 0 && !isInvalidTranslationText(p));
 
   if (validParagraphs.length === 0) return [];
 
@@ -929,7 +977,7 @@ export async function translateParagraphList(
         } catch {
           return cleanP;
         }
-      }),
+      })
     );
     results.push(...translatedBatch);
   }
@@ -1020,12 +1068,12 @@ async function ensureCategory(categorySlug: string) {
         categorySlug === "politics"
           ? "राजनीति"
           : categorySlug === "economy"
-            ? "अर्थव्यवस्था"
-            : categorySlug === "technology"
-              ? "प्रविधि"
-              : categorySlug === "culture"
-                ? "संस्कृति"
-                : "खेल",
+          ? "अर्थव्यवस्था"
+          : categorySlug === "technology"
+          ? "प्रविधि"
+          : categorySlug === "culture"
+          ? "संस्कृति"
+          : "खेल",
     })
     .returning({ id: categories.id });
 
@@ -1062,12 +1110,12 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
 
   try {
     await db.execute(
-      sql`ALTER TABLE "articles" ADD COLUMN IF NOT EXISTS "image_credit_url" text;`,
+      sql`ALTER TABLE "articles" ADD COLUMN IF NOT EXISTS "image_credit_url" text;`
     );
   } catch (error) {
     console.warn(
       "Failed to ensure image_credit_url column exists:",
-      (error as Error).message,
+      (error as Error).message
     );
   }
 
@@ -1078,7 +1126,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
         const categorySlug = String(record.category ?? "politics");
         const sourceName = String(record.sourceName ?? "Nepali Samachar");
         const sourceUrl = String(
-          record.sourceUrl ?? "https://www.nepalnews.com",
+          record.sourceUrl ?? "https://www.nepalnews.com"
         );
         const categoryId = await ensureCategory(categorySlug);
         const sourceId = await ensureSource(sourceName, sourceUrl);
@@ -1092,7 +1140,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
             id: row.id,
             slug: row.slug,
           })),
-          categorySlug,
+          categorySlug
         );
 
         return {
@@ -1114,14 +1162,16 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
           imageUrl: String(record.imageUrl ?? ""),
           imageAlt: String(record.imageAlt ?? articleTitle),
           imageCredit: String(record.imageCredit ?? "Unsplash"),
-          imageCreditUrl: String(record.imageCreditUrl ?? "https://unsplash.com"),
+          imageCreditUrl: String(
+            record.imageCreditUrl ?? "https://unsplash.com"
+          ),
           status: String(record.status ?? "published"),
           publishedAt:
             record.publishedAt instanceof Date
               ? record.publishedAt
               : new Date(),
         };
-      }),
+      })
     );
 
     await db
@@ -1135,7 +1185,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
 }
 
 async function triggerOnDemandRevalidation(
-  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>,
+  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>
 ) {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -1146,12 +1196,18 @@ async function triggerOnDemandRevalidation(
   const secret = process.env.REVALIDATE_SECRET || process.env.CRON_SECRET;
   if (!secret) {
     console.log(
-      "No REVALIDATE_SECRET or CRON_SECRET configured; skipping on-demand revalidation trigger.",
+      "No REVALIDATE_SECRET or CRON_SECRET configured; skipping on-demand revalidation trigger."
     );
     return;
   }
 
-  const paths = new Set<string>(["/", "/en", "/sitemap.xml"]);
+  const paths = new Set<string>([
+    "/",
+    "/en",
+    "/sitemap.xml",
+    "/sitemap-articles.xml",
+    "/sitemap-index.xml",
+  ]);
   const tags = new Set<string>(["articles"]);
 
   for (const article of newArticles) {
@@ -1167,7 +1223,7 @@ async function triggerOnDemandRevalidation(
   try {
     const url = new URL("/api/revalidate", siteUrl).toString();
     console.log(
-      `Triggering on-demand revalidation for ${paths.size} paths and ${tags.size} tags at ${url}...`,
+      `Triggering on-demand revalidation for ${paths.size} paths and ${tags.size} tags at ${url}...`
     );
 
     const response = await fetch(url, {
@@ -1189,13 +1245,66 @@ async function triggerOnDemandRevalidation(
       const text = await response.text();
       console.warn(
         `On-demand revalidation returned status ${response.status}:`,
-        text,
+        text
       );
     }
   } catch (error) {
     console.warn(
       "Failed to trigger on-demand revalidation:",
-      (error as Error).message,
+      (error as Error).message
+    );
+  }
+}
+
+async function triggerArticlesWebhook(
+  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>
+) {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.SITE_URL ||
+    "https://taajasamachar.basnetsameer.com.np";
+
+  const secret = process.env.WEBHOOK_SECRET || process.env.CRON_SECRET;
+  if (!secret) {
+    console.log(
+      "No WEBHOOK_SECRET or CRON_SECRET configured; skipping articles webhook trigger."
+    );
+    return;
+  }
+
+  try {
+    const url = new URL("/api/webhook/articles", siteUrl).toString();
+    console.log(
+      `Triggering articles webhook for ${newArticles.length} new articles at ${url}...`
+    );
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-webhook-secret": secret,
+      },
+      body: JSON.stringify({
+        action: "articles_published",
+        articles: newArticles,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Articles webhook succeeded:", data);
+    } else {
+      const text = await response.text();
+      console.warn(
+        `Articles webhook returned status ${response.status}:`,
+        text
+      );
+    }
+  } catch (error) {
+    console.warn(
+      "Failed to trigger articles webhook:",
+      (error as Error).message
     );
   }
 }
@@ -1241,7 +1350,7 @@ export async function runNewsFetch() {
 
     const duplicate = isDuplicateCandidate(
       entry.title,
-      existing.map((item) => item.title),
+      existing.map((item) => item.title)
     );
 
     if (!duplicate) {
@@ -1256,7 +1365,9 @@ export async function runNewsFetch() {
 
   for (const entry of selectedCandidates) {
     if (!hasTimeRemaining(25_000)) {
-      console.warn("Time limit approaching. Finalizing already fetched stories.");
+      console.warn(
+        "Time limit approaching. Finalizing already fetched stories."
+      );
       break;
     }
 
@@ -1265,18 +1376,18 @@ export async function runNewsFetch() {
       const fetched = await fetchHtml(entry.link, 5000);
       const pageData = fetched
         ? extractPageData(fetched, {
-          title: fallbackTitle,
-          snippet: entry.snippet,
-          source: entry.source,
-          link: entry.link,
-        })
+            title: fallbackTitle,
+            snippet: entry.snippet,
+            source: entry.source,
+            link: entry.link,
+          })
         : {
-          title: fallbackTitle,
-          excerpt: entry.snippet,
-          body: [entry.snippet],
-          imageUrl: "",
-          publishedAt: new Date().toISOString(),
-        };
+            title: fallbackTitle,
+            excerpt: entry.snippet,
+            body: [entry.snippet],
+            imageUrl: "",
+            publishedAt: new Date().toISOString(),
+          };
 
       const rawTitle = pageData.title || fallbackTitle;
       const rawExcerpt =
@@ -1308,7 +1419,7 @@ export async function runNewsFetch() {
         excerptEn = await translateSingle(rawExcerpt, "en");
         englishParagraphs = await translateParagraphList(
           nepaliParagraphs,
-          "en",
+          "en"
         );
 
         // If English translation retained Devanagari due to fallback or is an error, clean it
@@ -1323,7 +1434,7 @@ export async function runNewsFetch() {
           .map((p) =>
             hasDevanagari(p)
               ? `Reported developments regarding this story continue to unfold from ${entry.source}.`
-              : p,
+              : p
           );
       } else {
         // Source is English: preserve original English and translate to Nepali
@@ -1336,7 +1447,7 @@ export async function runNewsFetch() {
         excerptNe = await translateSingle(rawExcerpt, "ne");
         nepaliParagraphs = await translateParagraphList(
           englishParagraphs,
-          "ne",
+          "ne"
         );
 
         if (!hasDevanagari(titleNe) || isInvalidTranslationText(titleNe)) {
@@ -1345,13 +1456,15 @@ export async function runNewsFetch() {
         if (!hasDevanagari(excerptNe) || isInvalidTranslationText(excerptNe)) {
           excerptNe = rawExcerpt;
         }
-        nepaliParagraphs = nepaliParagraphs.filter((p) => !isInvalidTranslationText(p));
+        nepaliParagraphs = nepaliParagraphs.filter(
+          (p) => !isInvalidTranslationText(p)
+        );
       }
 
       const sourceCategory = inferCategorySlugFromText(
         titleEn || titleNe,
         `${excerptEn} ${englishParagraphs.join(" ")}`,
-        entry.category,
+        entry.category
       );
 
       const slugSeed =
@@ -1364,7 +1477,7 @@ export async function runNewsFetch() {
       const bodyEnHtml = toRichHtml(englishParagraphs.join("\n\n"), "en");
       const bodyNeHtml = toRichHtml(
         normalizeNepaliText(nepaliParagraphs.join("\n\n")),
-        "ne",
+        "ne"
       );
 
       const candidateImage = pageData.imageUrl;
@@ -1383,7 +1496,7 @@ export async function runNewsFetch() {
       if (quality.isUsable && candidateImage) {
         directImagesCount++;
         console.log(
-          `[Image Decision: DIRECT] Using publisher source image (${quality.width}x${quality.height}, ${quality.contentType}) for: "${entry.title}"`,
+          `[Image Decision: DIRECT] Using publisher source image (${quality.width}x${quality.height}, ${quality.contentType}) for: "${entry.title}"`
         );
         finalImage = {
           imageUrl: candidateImage,
@@ -1395,13 +1508,16 @@ export async function runNewsFetch() {
       } else {
         stockImagesCount++;
         console.log(
-          `[Image Decision: STOCK] Source image rejected (${quality.reason}), falling back to stock photo for: "${entry.title}"`,
+          `[Image Decision: STOCK] Source image rejected (${quality.reason}), falling back to stock photo for: "${entry.title}"`
         );
         const searchKeywords = extractSearchKeywords(
           titleEn || rawTitle,
-          sourceCategory,
+          sourceCategory
         );
-        const stockImage = await fetchStockImage(searchKeywords, sourceCategory);
+        const stockImage = await fetchStockImage(
+          searchKeywords,
+          sourceCategory
+        );
         finalImage = {
           imageUrl: stockImage.imageUrl,
           imageAlt: stockImage.imageAlt || `${titleEn || titleNe} image`,
@@ -1438,7 +1554,7 @@ export async function runNewsFetch() {
       });
     } catch (error) {
       console.warn(
-        `Failed processing entry "${entry.title}": ${(error as Error).message}`,
+        `Failed processing entry "${entry.title}": ${(error as Error).message}`
       );
     }
   }
@@ -1459,9 +1575,10 @@ export async function runNewsFetch() {
     await saveToDatabase(
       payload.map(({ hash, title, ...article }) => ({
         ...article,
-      })),
+      }))
     );
     await triggerOnDemandRevalidation(payload);
+    await triggerArticlesWebhook(payload);
   }
 
   const result = {
@@ -1472,16 +1589,20 @@ export async function runNewsFetch() {
   };
 
   console.log(
-    `Fetched ${entries.length} candidate entries; published ${payload.length} new stories.`,
+    `Fetched ${entries.length} candidate entries; published ${payload.length} new stories.`
   );
 
   console.log(
     `\n================ Image Source Summary ================\n` +
-    `Articles published: ${payload.length}\n` +
-    `Direct publisher source images: ${directImagesCount}\n` +
-    `Stock fallback photos: ${stockImagesCount}\n` +
-    `Direct source ratio: ${payload.length > 0 ? ((directImagesCount / payload.length) * 100).toFixed(1) : "0"}%\n` +
-    `======================================================\n`,
+      `Articles published: ${payload.length}\n` +
+      `Direct publisher source images: ${directImagesCount}\n` +
+      `Stock fallback photos: ${stockImagesCount}\n` +
+      `Direct source ratio: ${
+        payload.length > 0
+          ? ((directImagesCount / payload.length) * 100).toFixed(1)
+          : "0"
+      }%\n` +
+      `======================================================\n`
   );
 
   return result;
@@ -1507,7 +1628,7 @@ if (isDirectRun) {
       } catch (error) {
         console.warn(
           "Database connection close failed:",
-          (error as Error).message,
+          (error as Error).message
         );
       }
       process.exit(0);

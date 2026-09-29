@@ -43,6 +43,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: `${siteUrl.replace(/\/$/, "")}/sitemap.xml`,
+    sitemap: `${siteUrl.replace(/\/$/, "")}/sitemap-index.xml`,
   };
 }

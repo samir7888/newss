@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { getLatestArticles } from "@/lib/news-data";
 import { categories } from "@/lib/site";
 import { config } from "dotenv";
 config({ path: ".env.local" });
@@ -10,10 +9,10 @@ const siteUrl =
   "https://nepalisamachar.xyz";
 const origin = siteUrl.replace(/\/$/, "");
 
-export const revalidate = 60; // Revalidate sitemap every 1 minute
+export const revalidate = 3600; // Revalidate every hour - static content doesn't change often
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const articles = await getLatestArticles(200);
+  // Only handle static routes and categories - articles are handled by sitemap-articles.xml
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -197,32 +196,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]);
 
-  const articleRoutes: MetadataRoute.Sitemap = articles.flatMap((article) => [
-    {
-      url: `${origin}/ne/article/${article.slugNe}`,
-      lastModified: new Date(article.publishedAt),
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-      alternates: {
-        languages: {
-          ne: `${origin}/ne/article/${article.slugNe}`,
-          en: `${origin}/en/article/${article.slugEn}`,
-        },
-      },
-    },
-    {
-      url: `${origin}/en/article/${article.slugEn}`,
-      lastModified: new Date(article.publishedAt),
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-      alternates: {
-        languages: {
-          ne: `${origin}/ne/article/${article.slugNe}`,
-          en: `${origin}/en/article/${article.slugEn}`,
-        },
-      },
-    },
-  ]);
-
-  return [...staticRoutes, ...categoryRoutes, ...articleRoutes];
+  return [...staticRoutes, ...categoryRoutes];
 }

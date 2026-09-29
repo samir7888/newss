@@ -162,7 +162,7 @@ const detailFields = {
 
 async function withFallback<T>(
   callback: () => Promise<T>,
-  fallbackValue: T,
+  fallbackValue: T
 ): Promise<T> {
   try {
     return await callback();
@@ -192,16 +192,17 @@ export async function getCategories() {
 export async function getAllArticleSlugs(limit = 60) {
   return await withFallback(async () => {
     const rows = await db
-      .select({ slugEn: articles.slugEn, slugNe: articles.slugNe })
+      .select({
+        slugEn: articles.slugEn,
+        slugNe: articles.slugNe,
+        publishedAt: articles.publishedAt,
+      })
       .from(articles)
       .where(eq(articles.status, "published"))
       .orderBy(desc(articles.publishedAt))
       .limit(limit);
 
-    return rows.flatMap((row) => [
-      { locale: "ne", slug: row.slugNe },
-      { locale: "en", slug: row.slugEn },
-    ]);
+    return rows;
   }, []);
 }
 
@@ -226,7 +227,7 @@ export async function getLatestArticles(limit = 9) {
 export const getHomepageFeed = unstable_cache(
   () => fetchLatestArticles(24),
   ["homepage-feed"],
-  { revalidate: 1800, tags: ["articles", "homepage"] },
+  { revalidate: 1800, tags: ["articles", "homepage"] }
 );
 
 async function fetchArticleBySlug(locale: "ne" | "en", slug: string) {
@@ -234,17 +235,17 @@ async function fetchArticleBySlug(locale: "ne" | "en", slug: string) {
     const rows =
       locale === "ne"
         ? await db
-          .select(detailFields)
-          .from(articles)
-          .leftJoin(categories, eq(articles.categoryId, categories.id))
-          .where(eq(articles.slugNe, slug))
-          .limit(1)
+            .select(detailFields)
+            .from(articles)
+            .leftJoin(categories, eq(articles.categoryId, categories.id))
+            .where(eq(articles.slugNe, slug))
+            .limit(1)
         : await db
-          .select(detailFields)
-          .from(articles)
-          .leftJoin(categories, eq(articles.categoryId, categories.id))
-          .where(eq(articles.slugEn, slug))
-          .limit(1);
+            .select(detailFields)
+            .from(articles)
+            .leftJoin(categories, eq(articles.categoryId, categories.id))
+            .where(eq(articles.slugEn, slug))
+            .limit(1);
 
     return rows[0] ? toArticleRecord(rows[0] as DetailRow) : null;
   }, null);
@@ -253,7 +254,7 @@ async function fetchArticleBySlug(locale: "ne" | "en", slug: string) {
 export const getArticleBySlug = unstable_cache(
   (locale: "ne" | "en", slug: string) => fetchArticleBySlug(locale, slug),
   ["article-detail"],
-  { revalidate: 21600, tags: ["article-detail"] },
+  { revalidate: 21600, tags: ["article-detail"] }
 );
 
 export async function getArticlesByCategory(categorySlug: string, limit = 30) {
@@ -263,10 +264,7 @@ export async function getArticlesByCategory(categorySlug: string, limit = 30) {
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .where(
-        and(
-          eq(categories.slug, categorySlug),
-          eq(articles.status, "published"),
-        ),
+        and(eq(categories.slug, categorySlug), eq(articles.status, "published"))
       )
       .orderBy(desc(articles.publishedAt))
       .limit(limit);
@@ -278,13 +276,13 @@ export async function getArticlesByCategory(categorySlug: string, limit = 30) {
 export const getCategoryFeed = unstable_cache(
   (categorySlug: string) => getArticlesByCategory(categorySlug, 30),
   ["category-feed"],
-  { revalidate: 1800, tags: ["articles", "categories"] },
+  { revalidate: 1800, tags: ["articles", "categories"] }
 );
 
 export async function getRelatedArticles(
   categorySlug: string,
   articleId: number,
-  limit = 3,
+  limit = 3
 ) {
   return await withFallback(async () => {
     const rows = await db
@@ -319,8 +317,8 @@ export async function searchArticles(query: string) {
           ilike(articles.titleEn, pattern),
           ilike(articles.titleNe, pattern),
           ilike(articles.excerptEn, pattern),
-          ilike(articles.excerptNe, pattern),
-        ),
+          ilike(articles.excerptNe, pattern)
+        )
       )
       .orderBy(desc(articles.publishedAt))
       .limit(12);
