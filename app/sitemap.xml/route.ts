@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { categories } from "@/lib/site";
 import { getAllArticleSlugs } from "@/lib/news-data";
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 86400; // Revalidate once per day since articles are static
 
 export async function GET() {
   const siteUrl =
@@ -113,19 +113,19 @@ export async function GET() {
     },
   ]);
 
-  // Get recent articles (limit to avoid too large sitemap)
-  const articleSlugs = await getAllArticleSlugs(500);
+  // Get all articles since they're static and don't change
+  const articleSlugs = await getAllArticleSlugs();
   const articleRoutes = articleSlugs.flatMap((article) => [
     {
       url: `${origin}/ne/article/${article.slugNe}`,
       lastModified: new Date(article.publishedAt || new Date()).toISOString(),
-      changeFrequency: "daily",
+      changeFrequency: "never",
       priority: "0.8",
     },
     {
       url: `${origin}/en/article/${article.slugEn}`,
       lastModified: new Date(article.publishedAt || new Date()).toISOString(),
-      changeFrequency: "daily",
+      changeFrequency: "never",
       priority: "0.8",
     },
   ]);
@@ -151,7 +151,7 @@ ${urls}
   return new NextResponse(sitemap, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=3600", // 1 hour cache
+      "Cache-Control": "public, max-age=86400", // 24 hour cache
     },
   });
 }
