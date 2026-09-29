@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
       revalidatePath("/en");
 
       // Revalidate article cache tags
-      revalidateTag("articles");
-      revalidateTag("homepage");
+      revalidateTag("articles", "default");
+      revalidateTag("homepage", "default");
 
       // Revalidate individual article pages and categories
       for (const article of articles) {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         if (article.category) {
           revalidatePath(`/ne/category/${article.category}`);
           revalidatePath(`/en/category/${article.category}`);
-          revalidateTag(`category-${article.category}`);
+          revalidateTag(`category-${article.category}`, "default");
         }
       }
 

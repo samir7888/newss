@@ -18,13 +18,17 @@ export async function GET() {
       .flatMap((article) => [
         {
           url: `${origin}/ne/article/${article.slugNe}`,
-          lastModified: new Date(article.publishedAt).toISOString(),
+          lastModified: new Date(
+            article.publishedAt || new Date()
+          ).toISOString(),
           changeFrequency: "daily",
           priority: "0.8",
         },
         {
           url: `${origin}/en/article/${article.slugEn}`,
-          lastModified: new Date(article.publishedAt).toISOString(),
+          lastModified: new Date(
+            article.publishedAt || new Date()
+          ).toISOString(),
           changeFrequency: "daily",
           priority: "0.8",
         },
