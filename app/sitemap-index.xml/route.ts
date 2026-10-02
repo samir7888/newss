@@ -13,7 +13,6 @@ export async function GET() {
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>${origin}/sitemap.xml</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
   </sitemap>
 </sitemapindex>`;
 
