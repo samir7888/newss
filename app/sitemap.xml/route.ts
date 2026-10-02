@@ -11,7 +11,7 @@ export async function GET() {
   const origin = siteUrl.replace(/\/$/, "");
 
   // Keep this small while testing Google Search Console fetching.
-  const articleSlugs = await getAllArticleSlugs(5);
+  const articleSlugs = await getAllArticleSlugs(50);
   const articleRoutes = articleSlugs.flatMap((article) => [
     {
       url: `${origin}/ne/article/${article.slugNe}`,
