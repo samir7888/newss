@@ -34,8 +34,6 @@ export async function POST(request: NextRequest) {
     if (action === "articles_published" && Array.isArray(articles)) {
       // Revalidate sitemap and related paths immediately
       revalidatePath("/sitemap.xml");
-      revalidatePath("/sitemap-articles.xml");
-      revalidatePath("/sitemap-index.xml");
 
       // Revalidate homepage feeds
       revalidatePath("/");
@@ -65,13 +63,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { error: "Invalid action or missing articles data" },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (error) {
     console.error("Webhook error:", error);
     return NextResponse.json(
       { error: "Internal server error", message: (error as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
