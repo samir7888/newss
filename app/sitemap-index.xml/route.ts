@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const revalidate = 86400;
+
 export async function GET() {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -13,16 +15,12 @@ export async function GET() {
     <loc>${origin}/sitemap.xml</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
   </sitemap>
-  <sitemap>
-    <loc>${origin}/sitemap-articles.xml</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-  </sitemap>
 </sitemapindex>`;
 
   return new NextResponse(sitemapIndex, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=300", // 5 minutes cache
+      "Cache-Control": "public, max-age=86400",
     },
   });
 }

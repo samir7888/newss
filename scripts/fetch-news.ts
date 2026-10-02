@@ -175,7 +175,7 @@ async function readPublishedCache() {
 }
 
 async function writePublishedCache(
-  entries: Array<{ title: string; hash: string; sourceUrl: string }>
+  entries: Array<{ title: string; hash: string; sourceUrl: string }>,
 ) {
   await ensureCacheDir();
   await writeFile(cacheFilePath, JSON.stringify(entries, null, 2));
@@ -256,7 +256,7 @@ export function cleanText(value: string | null | undefined) {
 
 async function fetchHtml(
   url: string,
-  timeoutMs = 5000
+  timeoutMs = 5000,
 ): Promise<string | null> {
   try {
     const cleanUrl = (url ?? "").trim();
@@ -513,7 +513,7 @@ function getSourceSelectors(url: string) {
 
 export function resolveImageUrl(
   value: string | null | undefined,
-  baseUrl: string
+  baseUrl: string,
 ): string {
   if (!value) return "";
   const trimmed = value.trim();
@@ -568,18 +568,18 @@ function isJunkParagraph(text: string): boolean {
 
 export function extractPageData(
   html: string,
-  fallback: { title: string; snippet: string; source: string; link: string }
+  fallback: { title: string; snippet: string; source: string; link: string },
 ) {
   const $ = load(html);
 
   // Remove noise elements
   $(
-    "script, style, noscript, svg, form, iframe, header, footer, nav, aside, .advertisement, .ads, .social-share, .share-box, .fb-comments, .comments, .related-posts, .related-news, .recommended, .sidebar, .tags, .author-bio"
+    "script, style, noscript, svg, form, iframe, header, footer, nav, aside, .advertisement, .ads, .social-share, .share-box, .fb-comments, .comments, .related-posts, .related-news, .recommended, .sidebar, .tags, .author-bio",
   ).remove();
 
   const siteRules = getSourceSelectors(fallback.link);
   const candidateRoot = $(
-    "article, main, .article-content, .entry-content, .post-content, .story-content, .news-content, .detail-content"
+    "article, main, .article-content, .entry-content, .post-content, .story-content, .news-content, .detail-content",
   ).first();
 
   const structuredBlocks = $('script[type="application/ld+json"]').toArray();
@@ -614,22 +614,22 @@ export function extractPageData(
     typeof structuredData?.headline === "string"
       ? structuredData.headline
       : typeof structuredData?.name === "string"
-      ? structuredData.name
-      : "";
+        ? structuredData.name
+        : "";
 
   const structuredDescription =
     typeof structuredData?.description === "string"
       ? structuredData.description
       : typeof structuredData?.abstract === "string"
-      ? structuredData.abstract
-      : "";
+        ? structuredData.abstract
+        : "";
 
   const structuredBodySource =
     typeof structuredData?.articleBody === "string"
       ? structuredData.articleBody
       : Array.isArray(structuredData?.articleBody)
-      ? structuredData.articleBody.join("\n\n")
-      : "";
+        ? structuredData.articleBody.join("\n\n")
+        : "";
 
   const paragraphs = (() => {
     const extracted: string[] = [];
@@ -667,7 +667,7 @@ export function extractPageData(
     }
 
     return extracted.filter(
-      (paragraph) => paragraph.length > 20 && !isJunkParagraph(paragraph)
+      (paragraph) => paragraph.length > 20 && !isJunkParagraph(paragraph),
     );
   })();
 
@@ -692,7 +692,7 @@ export function extractPageData(
       $('meta[name="title"]').attr("content") ||
       candidateRoot.find("h1").first().text() ||
       $("h1").first().text() ||
-      fallback.title
+      fallback.title,
   );
 
   const excerpt = cleanText(
@@ -703,7 +703,7 @@ export function extractPageData(
       paragraphs[0] ||
       candidateRoot.find("p").first().text() ||
       $("p").first().text() ||
-      fallback.snippet
+      fallback.snippet,
   ).slice(0, 260);
 
   const publishedAt =
@@ -726,15 +726,15 @@ export function extractPageData(
     typeof structuredData?.image === "string"
       ? structuredData.image
       : Array.isArray(structuredData?.image)
-      ? typeof structuredData.image[0] === "string"
-        ? structuredData.image[0]
-        : (structuredData.image[0] as Record<string, unknown>)?.url ?? ""
-      : typeof structuredData?.image === "object" &&
-        structuredData.image !== null
-      ? (structuredData.image as Record<string, unknown>).url ??
-        (structuredData.image as Record<string, unknown>).contentUrl ??
-        ""
-      : "";
+        ? typeof structuredData.image[0] === "string"
+          ? structuredData.image[0]
+          : ((structuredData.image[0] as Record<string, unknown>)?.url ?? "")
+        : typeof structuredData?.image === "object" &&
+            structuredData.image !== null
+          ? ((structuredData.image as Record<string, unknown>).url ??
+            (structuredData.image as Record<string, unknown>).contentUrl ??
+            "")
+          : "";
 
   const imageUrlFromSelectors = siteRules.image
     ?.flatMap((selector) => {
@@ -759,16 +759,16 @@ export function extractPageData(
     imageUrlFromSelectors ||
     resolveImageUrl(
       $('meta[property="og:image"]').attr("content"),
-      fallback.link
+      fallback.link,
     ) ||
     resolveImageUrl(
       $('meta[name="twitter:image"]').attr("content"),
-      fallback.link
+      fallback.link,
     ) ||
     resolveImageUrl(
       candidateRoot.find("img").first().attr("src") ||
         candidateRoot.find("img").first().attr("data-src"),
-      fallback.link
+      fallback.link,
     ) ||
     resolveImageUrl($("img").first().attr("src"), fallback.link) ||
     "";
@@ -783,7 +783,7 @@ export function extractPageData(
 }
 
 export function isInvalidTranslationText(
-  text: string | null | undefined
+  text: string | null | undefined,
 ): boolean {
   if (!text || typeof text !== "string") return true;
   const lower = text.toLowerCase();
@@ -810,7 +810,7 @@ const translationCache = new Map<string, string>();
 export async function translateSingle(
   value: string,
   target: "en" | "ne",
-  timeoutMs = 3000
+  timeoutMs = 3000,
 ): Promise<string> {
   const trimmed = value.trim();
   if (!trimmed) return "";
@@ -834,7 +834,7 @@ export async function translateSingle(
     // 1. Google Translate GTX
     try {
       const url = new URL(
-        "https://translate.googleapis.com/translate_a/single"
+        "https://translate.googleapis.com/translate_a/single",
       );
       url.searchParams.set("client", "gtx");
       url.searchParams.set("sl", source);
@@ -896,8 +896,8 @@ export async function translateSingle(
         const translated = Array.isArray(dictResult)
           ? dictResult[0]
           : typeof dictResult === "string"
-          ? dictResult
-          : "";
+            ? dictResult
+            : "";
         if (
           translated &&
           !isInvalidTranslationText(translated) &&
@@ -957,7 +957,7 @@ export async function translateSingle(
 
 export async function translateParagraphList(
   paragraphs: string[],
-  target: "en" | "ne"
+  target: "en" | "ne",
 ): Promise<string[]> {
   const validParagraphs = paragraphs
     .map((p) => cleanText(p))
@@ -977,7 +977,7 @@ export async function translateParagraphList(
         } catch {
           return cleanP;
         }
-      })
+      }),
     );
     results.push(...translatedBatch);
   }
@@ -1068,12 +1068,12 @@ async function ensureCategory(categorySlug: string) {
         categorySlug === "politics"
           ? "राजनीति"
           : categorySlug === "economy"
-          ? "अर्थव्यवस्था"
-          : categorySlug === "technology"
-          ? "प्रविधि"
-          : categorySlug === "culture"
-          ? "संस्कृति"
-          : "खेल",
+            ? "अर्थव्यवस्था"
+            : categorySlug === "technology"
+              ? "प्रविधि"
+              : categorySlug === "culture"
+                ? "संस्कृति"
+                : "खेल",
     })
     .returning({ id: categories.id });
 
@@ -1110,12 +1110,12 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
 
   try {
     await db.execute(
-      sql`ALTER TABLE "articles" ADD COLUMN IF NOT EXISTS "image_credit_url" text;`
+      sql`ALTER TABLE "articles" ADD COLUMN IF NOT EXISTS "image_credit_url" text;`,
     );
   } catch (error) {
     console.warn(
       "Failed to ensure image_credit_url column exists:",
-      (error as Error).message
+      (error as Error).message,
     );
   }
 
@@ -1126,7 +1126,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
         const categorySlug = String(record.category ?? "politics");
         const sourceName = String(record.sourceName ?? "Nepali Samachar");
         const sourceUrl = String(
-          record.sourceUrl ?? "https://www.nepalnews.com"
+          record.sourceUrl ?? "https://www.nepalnews.com",
         );
         const categoryId = await ensureCategory(categorySlug);
         const sourceId = await ensureSource(sourceName, sourceUrl);
@@ -1140,7 +1140,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
             id: row.id,
             slug: row.slug,
           })),
-          categorySlug
+          categorySlug,
         );
 
         return {
@@ -1163,7 +1163,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
           imageAlt: String(record.imageAlt ?? articleTitle),
           imageCredit: String(record.imageCredit ?? "Unsplash"),
           imageCreditUrl: String(
-            record.imageCreditUrl ?? "https://unsplash.com"
+            record.imageCreditUrl ?? "https://unsplash.com",
           ),
           status: String(record.status ?? "published"),
           publishedAt:
@@ -1171,7 +1171,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
               ? record.publishedAt
               : new Date(),
         };
-      })
+      }),
     );
 
     await db
@@ -1185,7 +1185,7 @@ async function saveToDatabase(payload: Array<Record<string, unknown>>) {
 }
 
 async function triggerOnDemandRevalidation(
-  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>
+  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>,
 ) {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -1196,7 +1196,7 @@ async function triggerOnDemandRevalidation(
   const secret = process.env.REVALIDATE_SECRET || process.env.CRON_SECRET;
   if (!secret) {
     console.log(
-      "No REVALIDATE_SECRET or CRON_SECRET configured; skipping on-demand revalidation trigger."
+      "No REVALIDATE_SECRET or CRON_SECRET configured; skipping on-demand revalidation trigger.",
     );
     return;
   }
@@ -1205,7 +1205,6 @@ async function triggerOnDemandRevalidation(
     "/",
     "/en",
     "/sitemap.xml",
-    "/sitemap-articles.xml",
     "/sitemap-index.xml",
   ]);
   const tags = new Set<string>(["articles"]);
@@ -1223,7 +1222,7 @@ async function triggerOnDemandRevalidation(
   try {
     const url = new URL("/api/revalidate", siteUrl).toString();
     console.log(
-      `Triggering on-demand revalidation for ${paths.size} paths and ${tags.size} tags at ${url}...`
+      `Triggering on-demand revalidation for ${paths.size} paths and ${tags.size} tags at ${url}...`,
     );
 
     const response = await fetch(url, {
@@ -1245,19 +1244,19 @@ async function triggerOnDemandRevalidation(
       const text = await response.text();
       console.warn(
         `On-demand revalidation returned status ${response.status}:`,
-        text
+        text,
       );
     }
   } catch (error) {
     console.warn(
       "Failed to trigger on-demand revalidation:",
-      (error as Error).message
+      (error as Error).message,
     );
   }
 }
 
 async function triggerArticlesWebhook(
-  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>
+  newArticles: Array<{ slugEn: string; slugNe: string; category?: string }>,
 ) {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -1268,7 +1267,7 @@ async function triggerArticlesWebhook(
   const secret = process.env.WEBHOOK_SECRET || process.env.CRON_SECRET;
   if (!secret) {
     console.log(
-      "No WEBHOOK_SECRET or CRON_SECRET configured; skipping articles webhook trigger."
+      "No WEBHOOK_SECRET or CRON_SECRET configured; skipping articles webhook trigger.",
     );
     return;
   }
@@ -1276,7 +1275,7 @@ async function triggerArticlesWebhook(
   try {
     const url = new URL("/api/webhook/articles", siteUrl).toString();
     console.log(
-      `Triggering articles webhook for ${newArticles.length} new articles at ${url}...`
+      `Triggering articles webhook for ${newArticles.length} new articles at ${url}...`,
     );
 
     const response = await fetch(url, {
@@ -1298,13 +1297,13 @@ async function triggerArticlesWebhook(
       const text = await response.text();
       console.warn(
         `Articles webhook returned status ${response.status}:`,
-        text
+        text,
       );
     }
   } catch (error) {
     console.warn(
       "Failed to trigger articles webhook:",
-      (error as Error).message
+      (error as Error).message,
     );
   }
 }
@@ -1350,7 +1349,7 @@ export async function runNewsFetch() {
 
     const duplicate = isDuplicateCandidate(
       entry.title,
-      existing.map((item) => item.title)
+      existing.map((item) => item.title),
     );
 
     if (!duplicate) {
@@ -1366,7 +1365,7 @@ export async function runNewsFetch() {
   for (const entry of selectedCandidates) {
     if (!hasTimeRemaining(25_000)) {
       console.warn(
-        "Time limit approaching. Finalizing already fetched stories."
+        "Time limit approaching. Finalizing already fetched stories.",
       );
       break;
     }
@@ -1419,7 +1418,7 @@ export async function runNewsFetch() {
         excerptEn = await translateSingle(rawExcerpt, "en");
         englishParagraphs = await translateParagraphList(
           nepaliParagraphs,
-          "en"
+          "en",
         );
 
         // If English translation retained Devanagari due to fallback or is an error, clean it
@@ -1434,7 +1433,7 @@ export async function runNewsFetch() {
           .map((p) =>
             hasDevanagari(p)
               ? `Reported developments regarding this story continue to unfold from ${entry.source}.`
-              : p
+              : p,
           );
       } else {
         // Source is English: preserve original English and translate to Nepali
@@ -1447,7 +1446,7 @@ export async function runNewsFetch() {
         excerptNe = await translateSingle(rawExcerpt, "ne");
         nepaliParagraphs = await translateParagraphList(
           englishParagraphs,
-          "ne"
+          "ne",
         );
 
         if (!hasDevanagari(titleNe) || isInvalidTranslationText(titleNe)) {
@@ -1457,14 +1456,14 @@ export async function runNewsFetch() {
           excerptNe = rawExcerpt;
         }
         nepaliParagraphs = nepaliParagraphs.filter(
-          (p) => !isInvalidTranslationText(p)
+          (p) => !isInvalidTranslationText(p),
         );
       }
 
       const sourceCategory = inferCategorySlugFromText(
         titleEn || titleNe,
         `${excerptEn} ${englishParagraphs.join(" ")}`,
-        entry.category
+        entry.category,
       );
 
       const slugSeed =
@@ -1477,7 +1476,7 @@ export async function runNewsFetch() {
       const bodyEnHtml = toRichHtml(englishParagraphs.join("\n\n"), "en");
       const bodyNeHtml = toRichHtml(
         normalizeNepaliText(nepaliParagraphs.join("\n\n")),
-        "ne"
+        "ne",
       );
 
       const candidateImage = pageData.imageUrl;
@@ -1496,7 +1495,7 @@ export async function runNewsFetch() {
       if (quality.isUsable && candidateImage) {
         directImagesCount++;
         console.log(
-          `[Image Decision: DIRECT] Using publisher source image (${quality.width}x${quality.height}, ${quality.contentType}) for: "${entry.title}"`
+          `[Image Decision: DIRECT] Using publisher source image (${quality.width}x${quality.height}, ${quality.contentType}) for: "${entry.title}"`,
         );
         finalImage = {
           imageUrl: candidateImage,
@@ -1508,15 +1507,15 @@ export async function runNewsFetch() {
       } else {
         stockImagesCount++;
         console.log(
-          `[Image Decision: STOCK] Source image rejected (${quality.reason}), falling back to stock photo for: "${entry.title}"`
+          `[Image Decision: STOCK] Source image rejected (${quality.reason}), falling back to stock photo for: "${entry.title}"`,
         );
         const searchKeywords = extractSearchKeywords(
           titleEn || rawTitle,
-          sourceCategory
+          sourceCategory,
         );
         const stockImage = await fetchStockImage(
           searchKeywords,
-          sourceCategory
+          sourceCategory,
         );
         finalImage = {
           imageUrl: stockImage.imageUrl,
@@ -1554,7 +1553,7 @@ export async function runNewsFetch() {
       });
     } catch (error) {
       console.warn(
-        `Failed processing entry "${entry.title}": ${(error as Error).message}`
+        `Failed processing entry "${entry.title}": ${(error as Error).message}`,
       );
     }
   }
@@ -1575,7 +1574,7 @@ export async function runNewsFetch() {
     await saveToDatabase(
       payload.map(({ hash, title, ...article }) => ({
         ...article,
-      }))
+      })),
     );
     await triggerOnDemandRevalidation(payload);
     await triggerArticlesWebhook(payload);
@@ -1589,7 +1588,7 @@ export async function runNewsFetch() {
   };
 
   console.log(
-    `Fetched ${entries.length} candidate entries; published ${payload.length} new stories.`
+    `Fetched ${entries.length} candidate entries; published ${payload.length} new stories.`,
   );
 
   console.log(
@@ -1602,7 +1601,7 @@ export async function runNewsFetch() {
           ? ((directImagesCount / payload.length) * 100).toFixed(1)
           : "0"
       }%\n` +
-      `======================================================\n`
+      `======================================================\n`,
   );
 
   return result;
@@ -1628,7 +1627,7 @@ if (isDirectRun) {
       } catch (error) {
         console.warn(
           "Database connection close failed:",
-          (error as Error).message
+          (error as Error).message,
         );
       }
       process.exit(0);
