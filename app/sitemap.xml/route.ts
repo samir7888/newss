@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { categories } from "@/lib/site";
 import { getAllArticleSlugs } from "@/lib/news-data";
 
 export const revalidate = 86400; // Revalidate once per day since articles are static
@@ -11,94 +10,8 @@ export async function GET() {
     "https://nepalisamachar.xyz";
   const origin = siteUrl.replace(/\/$/, "");
 
-  const staticRoutes = [
-    {
-      url: `${origin}`,
-      changeFrequency: "hourly",
-      priority: "1.0",
-    },
-    {
-      url: `${origin}/en`,
-      changeFrequency: "hourly",
-      priority: "1.0",
-    },
-    {
-      url: `${origin}/ne/search`,
-      changeFrequency: "daily",
-      priority: "0.7",
-    },
-    {
-      url: `${origin}/en/search`,
-      changeFrequency: "daily",
-      priority: "0.7",
-    },
-    {
-      url: `${origin}/ne/saved`,
-      changeFrequency: "weekly",
-      priority: "0.5",
-    },
-    {
-      url: `${origin}/en/saved`,
-      changeFrequency: "weekly",
-      priority: "0.5",
-    },
-    {
-      url: `${origin}/ne/about`,
-      changeFrequency: "monthly",
-      priority: "0.6",
-    },
-    {
-      url: `${origin}/en/about`,
-      changeFrequency: "monthly",
-      priority: "0.6",
-    },
-    {
-      url: `${origin}/ne/contact`,
-      changeFrequency: "monthly",
-      priority: "0.6",
-    },
-    {
-      url: `${origin}/en/contact`,
-      changeFrequency: "monthly",
-      priority: "0.6",
-    },
-    {
-      url: `${origin}/ne/privacy-policy`,
-      changeFrequency: "monthly",
-      priority: "0.3",
-    },
-    {
-      url: `${origin}/en/privacy-policy`,
-      changeFrequency: "monthly",
-      priority: "0.3",
-    },
-    {
-      url: `${origin}/ne/terms`,
-      changeFrequency: "monthly",
-      priority: "0.3",
-    },
-    {
-      url: `${origin}/en/terms`,
-      changeFrequency: "monthly",
-      priority: "0.3",
-    },
-  ];
-
-  const categoryRoutes = categories.flatMap((cat) => [
-    {
-      url: `${origin}/ne/category/${cat.slug}`,
-      changeFrequency: "hourly",
-      priority: "0.9",
-    },
-    {
-      url: `${origin}/en/category/${cat.slug}`,
-      changeFrequency: "hourly",
-      priority: "0.9",
-    },
-  ]);
-
-  // Get all articles since they're static and don't change
-  const articleSlugs = await getAllArticleSlugs(24_000);
+  // Keep this small while testing Google Search Console fetching.
+  const articleSlugs = await getAllArticleSlugs(5);
   const articleRoutes = articleSlugs.flatMap((article) => [
     {
       url: `${origin}/ne/article/${article.slugNe}`,
@@ -118,9 +31,7 @@ export async function GET() {
     },
   ]);
 
-  const allUrls = [...staticRoutes, ...categoryRoutes, ...articleRoutes];
-
-  const urls = allUrls
+  const urls = articleRoutes
     .map((item) => {
       const lastModified =
         "lastModified" in item && item.lastModified
