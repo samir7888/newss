@@ -43,6 +43,9 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: `${siteUrl}/sitemap-index.xml`,
+    sitemap: [
+      `${siteUrl}/sitemap-index.xml`,
+      `${siteUrl}/news-sitemap.xml`,
+    ],
   };
 }

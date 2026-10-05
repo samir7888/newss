@@ -1206,6 +1206,7 @@ async function triggerOnDemandRevalidation(
     "/en",
     "/sitemap.xml",
     "/sitemap-index.xml",
+    "/news-sitemap.xml",
   ]);
   const tags = new Set<string>(["articles"]);
 
@@ -1252,6 +1253,87 @@ async function triggerOnDemandRevalidation(
       "Failed to trigger on-demand revalidation:",
       (error as Error).message,
     );
+  }
+}
+
+/**
+ * IndexNow: Instantly notify search engines (Bing, Yandex, DuckDuckGo, etc.)
+ * about new article URLs. This is the fastest way to get URLs indexed —
+ * engines process submissions within minutes/hours, not days.
+ *
+ * Setup: Add INDEXNOW_KEY to your GitHub Actions secrets and .env.local.
+ * Generate a key at: https://www.bing.com/indexnow/getstarted
+ * Then create a file at /public/<key>.txt with just the key as content.
+ */
+async function triggerIndexNow(
+  newArticles: Array<{ slugEn: string; slugNe: string }>,
+) {
+  const indexNowKey = process.env.INDEXNOW_KEY;
+  if (!indexNowKey) {
+    console.log(
+      "INDEXNOW_KEY not configured; skipping IndexNow submission. " +
+        "Generate a key at https://www.bing.com/indexnow/getstarted and add it to secrets.",
+    );
+    return;
+  }
+
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "https://nepalisamachar.xyz"
+  ).replace(/\/$/, "");
+
+  const host = new URL(siteUrl).hostname;
+
+  // Build the list of all new article URLs (both locales)
+  const urls: string[] = [];
+  for (const article of newArticles) {
+    if (article.slugNe) urls.push(`${siteUrl}/ne/article/${article.slugNe}`);
+    if (article.slugEn) urls.push(`${siteUrl}/en/article/${article.slugEn}`);
+  }
+
+  if (urls.length === 0) return;
+
+  // IndexNow supports up to 10,000 URLs per batch
+  const MAX_BATCH = 10_000;
+  const batches: string[][] = [];
+  for (let i = 0; i < urls.length; i += MAX_BATCH) {
+    batches.push(urls.slice(i, i + MAX_BATCH));
+  }
+
+  // Submit to Bing's IndexNow endpoint (covers Bing, Yandex, DuckDuckGo, etc.)
+  // Google also syncs from Bing's IndexNow feed
+  const indexNowEndpoint = "https://api.indexnow.org/indexnow";
+
+  for (const batch of batches) {
+    try {
+      console.log(
+        `Submitting ${batch.length} URLs to IndexNow (${indexNowEndpoint})...`,
+      );
+      const response = await fetch(indexNowEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          host,
+          key: indexNowKey,
+          keyLocation: `${siteUrl}/${indexNowKey}.txt`,
+          urlList: batch,
+        }),
+      });
+
+      if (response.ok || response.status === 202) {
+        console.log(
+          `IndexNow submission accepted (${response.status}) for ${batch.length} URLs.`,
+        );
+      } else {
+        const text = await response.text();
+        console.warn(
+          `IndexNow returned status ${response.status}: ${text.slice(0, 200)}`,
+        );
+      }
+    } catch (error) {
+      console.warn("IndexNow submission failed:", (error as Error).message);
+    }
   }
 }
 
@@ -1577,6 +1659,7 @@ export async function runNewsFetch() {
       })),
     );
     await triggerOnDemandRevalidation(payload);
+    await triggerIndexNow(payload);
     await triggerArticlesWebhook(payload);
   }
 

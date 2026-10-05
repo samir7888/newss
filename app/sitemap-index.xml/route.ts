@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 export async function GET() {
   const siteUrl =
@@ -14,12 +14,15 @@ export async function GET() {
   <sitemap>
     <loc>${origin}/sitemap.xml</loc>
   </sitemap>
+  <sitemap>
+    <loc>${origin}/news-sitemap.xml</loc>
+  </sitemap>
 </sitemapindex>`;
 
   return new NextResponse(sitemapIndex, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=86400",
+      "Cache-Control": "public, max-age=3600, stale-while-revalidate=60",
     },
   });
 }

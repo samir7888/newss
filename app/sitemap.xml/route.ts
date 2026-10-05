@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAllArticleSlugs } from "@/lib/news-data";
 
-export const revalidate = 86400; // Revalidate once per day since articles are static
+export const revalidate = 3600; // Revalidate every hour so new articles appear quickly
 
 export async function GET() {
   const siteUrl =
@@ -10,8 +10,8 @@ export async function GET() {
     "https://nepalisamachar.xyz";
   const origin = siteUrl.replace(/\/$/, "");
 
-  // Keep this small while testing Google Search Console fetching.
-  const articleSlugs = await getAllArticleSlugs(50);
+  // Fetch all published articles for a complete sitemap
+  const articleSlugs = await getAllArticleSlugs(5000);
   const articleRoutes = articleSlugs.flatMap((article) => [
     {
       url: `${origin}/ne/article/${article.slugNe}`,
@@ -54,7 +54,7 @@ ${urls}
   return new NextResponse(sitemap, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=86400", // 24 hour cache
+        "Cache-Control": "public, max-age=3600, stale-while-revalidate=60", // 1 hour cache
     },
   });
 }
