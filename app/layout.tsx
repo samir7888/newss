@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import "./globals.css";
+import DelayedMonetag from "@/components/DelayedMonetag";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -132,18 +133,7 @@ export default function RootLayout({
         )}
 
 
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(s){s.dataset.zone='11947655',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
-          }}
-        />
-
-        {/* pop undertag-multi */}
-        <script src="https://quge5.com/88/tag.min.js"
-          data-zone="278495"
-          async
-          data-cfasync="false"
-        />
+        
 
 
 
@@ -153,15 +143,16 @@ export default function RootLayout({
 
 
 
-        <script
-          src="https://n6wxm.com/vignette.min.js"
-          data-zone="11772604"
-          async
-          data-cfasync="false"
-        />
+
+       
+
+
       </head>
       <body className="min-h-full bg-[#FAFAF8] text-slate-900 font-sans">
         {children}
+
+        <DelayedMonetag />
+
         <Analytics />
       </body>
     </html>
