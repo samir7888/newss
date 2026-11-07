@@ -30,7 +30,7 @@ const MONETAG_ZONE_TYPE: Record<AdVariant, MonetagZoneType> = {
 // Monetag — fill these after creating zones in https://monetag.com dashboard.
 // Only "Native Banner" and "Banner" zone types are supported here.
 // Do NOT use Popunder / Interstitial / Vignette / SmartLink zones.
-const MONETAG_NATIVE_ZONE_ID = 11772604
+const MONETAG_NATIVE_ZONE_ID = 11772604;
 const MONETAG_BANNER_ZONE_ID =
   process.env.NEXT_PUBLIC_MONETAG_BANNER_ZONE_ID ?? "";
 const MONETAG_SCRIPT_HOST =
@@ -59,29 +59,28 @@ interface AdSlotProps {
  * Sizes match the zone dimensions created in Monetag's dashboard.
  * Adjust `inner` height if your actual zone uses a different size.
  */
-const variantStyles: Record<AdVariant, { container: string; inner: string }> =
-  {
-    leaderboard: {
-      // ~728×90 leaderboard / responsive native strip
-      container: "my-8 w-full",
-      inner: "h-[90px] sm:h-[110px] md:h-[120px] max-w-[970px] mx-auto",
-    },
-    "in-feed": {
-      // Native in-feed unit — matches typical 320×100 / fluid native
-      container: "my-6 w-full",
-      inner: "h-[120px] sm:h-[140px]",
-    },
-    "in-article": {
-      // 300×250 medium rectangle, centred in article column
-      container: "my-10 w-full",
-      inner: "h-[250px] sm:h-[280px] max-w-[680px] mx-auto",
-    },
-    sidebar: {
-      // 300×250 medium rectangle — hidden on mobile via parent wrapper
-      container: "my-6 w-full",
-      inner: "h-[250px] max-w-[300px] mx-auto",
-    },
-  };
+const variantStyles: Record<AdVariant, { container: string; inner: string }> = {
+  leaderboard: {
+    // ~728×90 leaderboard / responsive native strip
+    container: "my-8 w-full",
+    inner: "h-[90px] sm:h-[110px] md:h-[120px] max-w-[970px] mx-auto",
+  },
+  "in-feed": {
+    // Native in-feed unit — matches typical 320×100 / fluid native
+    container: "my-6 w-full",
+    inner: "h-[120px] sm:h-[140px]",
+  },
+  "in-article": {
+    // 300×250 medium rectangle, centred in article column
+    container: "my-10 w-full",
+    inner: "h-[250px] sm:h-[280px] max-w-[680px] mx-auto",
+  },
+  sidebar: {
+    // 300×250 medium rectangle — hidden on mobile via parent wrapper
+    container: "my-6 w-full",
+    inner: "h-[250px] max-w-[300px] mx-auto",
+  },
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -106,6 +105,8 @@ export function AdSlot({
     !isMonetagLive && !!(ADSENSE_CLIENT && ADSENSE_SLOTS[variant]);
 
   // ── Monetag script injection (per-component, async, no <head> pollution) ──
+  // COMMENTED OUT - Monetag ads disabled
+  /*
   useEffect(() => {
     if (!isMonetagLive || !containerRef.current) return;
 
@@ -128,6 +129,7 @@ export function AdSlot({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMonetagLive, monetagZoneId]);
+  */
 
   // ── AdSense push (only when Monetag is absent and AdSense vars are set) ──
   useEffect(() => {
@@ -189,7 +191,9 @@ export function AdSlot({
             <span>{displayLabel}</span>
           </div>
           <p className="mt-1 text-[11px] text-slate-400">
-            {locale === "ne" ? "यहाँ विज्ञापन प्रदर्शन हुनेछ" : "Ad space reserved"}
+            {locale === "ne"
+              ? "यहाँ विज्ञापन प्रदर्शन हुनेछ"
+              : "Ad space reserved"}
           </p>
         </div>
       )}

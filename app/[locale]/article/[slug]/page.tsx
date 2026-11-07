@@ -13,8 +13,17 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { toRichHtml } from "@/lib/article-content";
-import { getAllArticleSlugs, getArticleBySlug, getCategories, getRelatedArticles } from "@/lib/news-data";
-import { formatFullDate, formatRelativeTime, calculateReadTime } from "@/lib/format-date";
+import {
+  getAllArticleSlugs,
+  getArticleBySlug,
+  getCategories,
+  getRelatedArticles,
+} from "@/lib/news-data";
+import {
+  formatFullDate,
+  formatRelativeTime,
+  calculateReadTime,
+} from "@/lib/format-date";
 import { getCategoryTheme } from "@/lib/category-theme";
 import type { Locale } from "@/lib/site";
 
@@ -82,8 +91,12 @@ export default async function ArticlePage({
 
   if (!article) notFound();
 
-  const category = categoriesList.find((item) => item.slug === article.category);
-  const categoryName = category ? category.name[resolvedLocale] : article.category;
+  const category = categoriesList.find(
+    (item) => item.slug === article.category
+  );
+  const categoryName = category
+    ? category.name[resolvedLocale]
+    : article.category;
   const theme = getCategoryTheme(article.category);
   const articleId =
     "id" in article && typeof article.id === "number" ? article.id : -1;
@@ -95,7 +108,9 @@ export default async function ArticlePage({
       : article.slug;
   const alternateSlug =
     resolvedLocale === "ne" ? article.slugEn : article.slugNe;
-  const alternateHref = `/${resolvedLocale === "ne" ? "en" : "ne"}/article/${alternateSlug}`;
+  const alternateHref = `/${
+    resolvedLocale === "ne" ? "en" : "ne"
+  }/article/${alternateSlug}`;
 
   const timeAgo = formatRelativeTime(article.publishedAt, resolvedLocale);
   const fullDate = formatFullDate(article.publishedAt, resolvedLocale);
@@ -178,8 +193,6 @@ export default async function ArticlePage({
                 {timeAgo}
               </span>
             </div>
-
-
           </div>
 
           {/* §2: LARGE HEADLINE (Owns the top of page) */}
@@ -192,8 +205,6 @@ export default async function ArticlePage({
             {article.excerpt[resolvedLocale]}
           </p>
 
-
-
           {/* ============================================================= */}
           {/* §6: HERO IMAGE WITH VISIBLE CAPTION + PHOTO CREDIT */}
           {/* ============================================================= */}
@@ -201,7 +212,10 @@ export default async function ArticlePage({
             <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200/80">
               <Image
                 src={article.image}
-                alt={article.imageAlt[resolvedLocale] || article.title[resolvedLocale]}
+                alt={
+                  article.imageAlt[resolvedLocale] ||
+                  article.title[resolvedLocale]
+                }
                 fill
                 priority
                 unoptimized
@@ -237,7 +251,9 @@ export default async function ArticlePage({
             category={categoryName}
             image={article.image}
             publishedAt={article.publishedAt}
-            source={resolvedLocale === "ne" ? "सम्पादकीय टोली" : "Editorial Desk"}
+            source={
+              resolvedLocale === "ne" ? "सम्पादकीय टोली" : "Editorial Desk"
+            }
             readTime={readTime}
             bodyHtml={bodyHtml}
             bodyText={rawBodyText}
@@ -253,8 +269,25 @@ export default async function ArticlePage({
             />
           </div>
 
+          {/* SUPPORT THE DEVELOPER BUTTON */}
+          <div className="flex items-center justify-center py-6 no-print">
+            <a
+              href="https://cr8rs.app/therealme/tip"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <span>❤️</span>
+              <span>
+                {resolvedLocale === "ne"
+                  ? "डेभलपरलाई सपोर्ट गर्नुहोस्"
+                  : "Support the Developer"}
+              </span>
+            </a>
+          </div>
+
           {/* §5: IN-ARTICLE AD UNIT (Clearly boxed & labelled) */}
-          <AdSlot variant="in-article" locale={resolvedLocale} className="no-print" />
+          {/* <AdSlot variant="in-article" locale={resolvedLocale} className="no-print" /> */}
 
           {/* SHARE BUTTONS */}
           <div className="no-print">
@@ -313,7 +346,11 @@ export default async function ArticlePage({
               <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
                 {relatedArticles.slice(0, 3).map((rel) => (
                   <ArticleCard
-                    key={"id" in rel && typeof rel.id === "number" ? rel.id : rel.slug}
+                    key={
+                      "id" in rel && typeof rel.id === "number"
+                        ? rel.id
+                        : rel.slug
+                    }
                     article={rel}
                     locale={resolvedLocale}
                     layout="grid-card"

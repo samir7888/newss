@@ -1,6 +1,7 @@
-
 "use client";
 
+// COMMENTED OUT - Monetag ads disabled
+/*
 import { useEffect } from "react";
 
 export default function DelayedMonetag() {
@@ -54,5 +55,11 @@ export default function DelayedMonetag() {
     };
   }, []);
 
+  return null;
+}
+*/
+
+// Placeholder component while ads are disabled
+export default function DelayedMonetag() {
   return null;
 }
