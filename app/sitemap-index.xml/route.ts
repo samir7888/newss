@@ -7,7 +7,7 @@ export async function GET() {
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
     "https://nepalisamachar.xyz";
-  const origin = siteUrl.replace(/\/$/, "");
+  const origin = siteUrl.replace(/\/$/, "").trim();
 
   const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

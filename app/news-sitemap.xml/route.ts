@@ -11,7 +11,7 @@ export async function GET() {
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
     "https://nepalisamachar.xyz"
-  ).replace(/\/$/, "");
+  ).replace(/\/$/, "").trim();
 
   // Google News only indexes articles published in the last 48 hours
   const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000);

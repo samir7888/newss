@@ -8,7 +8,8 @@ export async function GET() {
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
     "https://nepalisamachar.xyz";
-  const origin = siteUrl.replace(/\/$/, "");
+  const origin = siteUrl.replace(/\/$/, "").trim();
+  
 
   // Fetch all published articles for a complete sitemap
   const articleSlugs = await getAllArticleSlugs(5000);
